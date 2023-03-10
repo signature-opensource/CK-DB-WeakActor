@@ -17,10 +17,10 @@ begin
     if @GroupId <> @WeakActorId and not exists( select 1 from CK.tActorProfile where GroupId = @GroupId and ActorId = @WeakActorId )
     begin
         -- If this is the System Group, only members of it can add new Users.
-		if @GroupId = 1 
+		if @GroupId = 1
 		begin
-			if not exists( select 1 from CK.tActorProfile p where p.GroupId = 1 and p.ActorId = @ActorId ) 
-				throw 50000, 'Security.ActorMustBeSytem', 1;
+			if not exists( select 1 from CK.tActorProfile p where p.GroupId = 1 and p.ActorId = @ActorId )
+				throw 50000, 'Security.ActorMustBeSystem', 1;
 		end
 
 		--<PreWeakActorAdd revert />

@@ -1,16 +1,9 @@
-using CK.Core;
+﻿using CK.Core;
 using CK.SqlServer;
-using System.Threading.Tasks;
 
 namespace CK.DB.Actor.WeakActor
 {
-    /// <summary>
-    /// Holds the persisted <see cref="Actor.WeakActor"/>.
-    /// </summary>
-    [SqlTable( "tWeakActor", Package = typeof( Package ) )]
-    [Versions( "1.0.0" )]
-    [SqlObjectItem( "vWeakActor" )]
-    public abstract partial class WeakActorTable : SqlTable
+    public abstract partial class WeakActorTable
     {
         /// <summary>
         /// Creates a WeakActor.
@@ -19,7 +12,7 @@ namespace CK.DB.Actor.WeakActor
         /// <param name="actorId">The current actor identifier.</param>
         /// <param name="weakActorName">The WeakActor name to create.</param>
         [SqlProcedure( "sWeakActorCreate" )]
-        public abstract Task<int> CreateAsync( ISqlCallContext c, int actorId, string weakActorName );
+        public abstract int Create( ISqlCallContext c, int actorId, string weakActorName );
 
         /// <summary>
         /// Destroys a WeakActor by its identifier (does nothing if The WeakActor does not exist).
@@ -28,7 +21,7 @@ namespace CK.DB.Actor.WeakActor
         /// <param name="actorId">The current actor identifier.</param>
         /// <param name="weakActorId">The WeakActor identifier to destroy.</param>
         [SqlProcedure( "sWeakActorDestroy" )]
-        public abstract Task DestroyAsync( ISqlCallContext c, int actorId, int weakActorId );
+        public abstract void Destroy( ISqlCallContext c, int actorId, int weakActorId );
 
         /// <summary>
         /// Adds a WeakActor into a Group.
@@ -40,6 +33,6 @@ namespace CK.DB.Actor.WeakActor
         /// <param name="weakActorId">The WeakActor identifier to add.</param>
         /// <returns>An awaitable.</returns>
         [SqlProcedure( "sGroupWeakActorAdd" )]
-        public abstract Task AddIntoGroupAsync( ISqlCallContext c, int actorId, int groupId, int weakActorId );
+        public abstract void AddIntoGroup( ISqlCallContext c, int actorId, int groupId, int weakActorId );
     }
 }

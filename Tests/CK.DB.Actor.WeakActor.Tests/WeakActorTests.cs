@@ -3,8 +3,10 @@ using CK.SqlServer;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using static CK.Testing.DBSetupTestHelper;
+using Dapper;
 
 namespace CK.DB.Actor.WeakActor.Tests
 {
@@ -18,7 +20,8 @@ namespace CK.DB.Actor.WeakActor.Tests
             using( var context = new SqlStandardCallContext() )
             {
                 await Table.Invoking( sut => sut.CreateAsync( context, 0, Guid.NewGuid().ToString() ) )
-                    .Should().ThrowAsync<SqlDetailedException>();
+                           .Should()
+                           .ThrowAsync<SqlDetailedException>();
             }
         }
 
@@ -47,6 +50,7 @@ namespace CK.DB.Actor.WeakActor.Tests
         public async Task can_add_a_weak_actor_into_a_group_Async()
         {
             var groupTable = TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+            Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
 
             using( var context = new SqlStandardCallContext() )
             {
