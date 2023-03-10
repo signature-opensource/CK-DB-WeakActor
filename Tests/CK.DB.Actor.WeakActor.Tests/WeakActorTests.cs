@@ -51,19 +51,38 @@ namespace CK.DB.Actor.WeakActor.Tests
         {
             var groupTable = TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
             Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
+            var userTable = TestHelper.StObjMap.StObjs.Obtain<UserTable>();
+            Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
 
             using( var context = new SqlStandardCallContext() )
             {
                 var groupId = await groupTable.CreateGroupAsync( context, 1 );
                 var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
 
-                await Table.Invoking( sut => sut.AddWeakActorIntoGroupAsync( context, 1, groupId, 3712 ) )
-                    .Should().ThrowAsync<SqlDetailedException>();
+                var userActorId = await userTable.CreateUserAsync( context, 1, Guid.NewGuid().ToString() );
+                await Table.Invoking( sut => sut.AddIntoGroupAsync( context, 1, groupId, userActorId ) )
+                           .Should()
+                           .ThrowAsync<SqlDetailedException>();
 
-                await Table.AddWeakActorIntoGroupAsync( context, 1, groupId, weakActorId );
+                await Table.AddIntoGroupAsync( context, 1, groupId, weakActorId );
 
-                Table.Database.ExecuteReader( "select * from CK.tActorProfile where GroupId = @0 and ActorId = @1", groupId, weakActorId )
-                    .Rows.Should().HaveCount( 1 );
+                var sql = "select count(*) from CK.tActorProfile where GroupId = @GroupId and ActorId = @WeakActorId";
+                context[Table].QuerySingle<int>( sql, new { groupId, weakActorId } )
+                              .Should()
+                              .Be( 1 );
+            }
+        }
+
+        [Test]
+        public void create_twice_the_same_weak_actor_name_should_throw()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var name = Guid.NewGuid().ToString();
+                Table.Create( context, 1, name );
+                Table.Invoking( sut => sut.Create( context, 1, name ) )
+                     .Should()
+                     .Throw<SqlDetailedException>();
             }
         }
     }
