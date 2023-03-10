@@ -1,0 +1,11 @@
+-- SetupConfig: {}
+create transformer on CK.sWeakActorCreate
+as
+begin
+    add parameter @ZoneId int = 0;
+
+    in single part {insert into CK.tWeakActor}
+    begin
+        add column ZoneId = @ZoneId;
+    end
+end

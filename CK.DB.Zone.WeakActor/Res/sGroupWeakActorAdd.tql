@@ -1,0 +1,20 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupWeakActorAdd
+as
+begin
+
+    inject
+    "
+        if not exists
+        (
+            select 1
+            from CK.tGroup g
+            join CK.tWeakActor w on g.ZoneId = w.ZoneId
+            where g.GroupId = @GroupId
+                and w.WeakActorId = @weakActorId
+        )
+        throw 50000, 'WeakActor.OutOfZone', 1;
+    "
+    into PreWeakActorAdd
+
+end
