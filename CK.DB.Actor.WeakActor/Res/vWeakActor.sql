@@ -1,5 +1,6 @@
 create view CK.vWeakActor
 as
     select WeakActorId,
-           WeakActorName
+           WeakActorName,
+           CreationDate
     from CK.tWeakActor;
