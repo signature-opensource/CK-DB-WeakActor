@@ -1,0 +1,49 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupWeakActorAdd
+as
+begin
+
+
+inject "
+        /*
+        "
+after single "--<CheckZoneRange"
+
+
+inject "*/
+"
+before single "--</CheckZoneRange"
+
+inject "
+        declare @ZoneMatch bit;
+
+        with AllZonesInHierarchy as
+        (
+            select zDescendants.ZoneId as ZoneIdInHierarchy
+            from CK.tZone zone
+            join CK.tZone zDescendants on zDescendants.HierarchicalId.IsDescendantOf
+            (
+                zone.HierarchicalId.GetAncestor
+                ((
+                    -- 0 is the minimum value that can be passed as argument.
+                    select top 1 max(HLevel)
+                    from (values (0), (cast(zone.HierarchicalId.GetLevel() as int) - 1)) as HLevels(HLevel)
+                ))
+            ) = 1
+            join CK.tGroup g on g.ZoneId = zone.ZoneId
+            where g.GroupId = @GroupId
+         )
+
+        select @ZoneMatch = 1
+        from AllZonesInHierarchy a
+        join CK.tWeakActor w on w.ZoneId = a.ZoneIdInHierarchy
+        where w.WeakActorId = @WeakActorId;
+
+        if not exists( select @ZoneMatch )
+        begin
+            ;throw 50000, 'WeakActor.OutOfHZone', 1;
+        end
+        "
+into CheckZoneRange
+
+end
