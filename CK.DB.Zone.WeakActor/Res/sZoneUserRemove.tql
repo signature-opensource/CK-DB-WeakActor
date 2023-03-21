@@ -1,0 +1,14 @@
+-- SetupConfig: {}
+create transformer on CK.sZoneUserRemove
+as
+begin
+
+inject "
+        if exists(select 1 from CK.tWeakActor where WeakActorId=@UserId and ZoneId=@ZoneId)
+        begin
+            ;throw 50000,'Zone.CannotRemoveWeakActor',1;
+        end
+"
+into PreZoneUserRemove
+
+end
