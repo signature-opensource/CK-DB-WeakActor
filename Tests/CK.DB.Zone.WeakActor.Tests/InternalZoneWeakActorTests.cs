@@ -1,0 +1,34 @@
+﻿using CK.Core;
+using CK.SqlServer;
+using FluentAssertions;
+using NUnit.Framework;
+using System;
+using System.Linq;
+using static CK.Testing.DBSetupTestHelper;
+using Dapper;
+
+namespace CK.DB.Zone.WeakActor.Tests
+{
+    public sealed class InternalZoneWeakActorTests
+    {
+        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
+        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
+        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+
+        [Test]
+        public void should_throw_when_add_weak_actor_into_a_group_out_of_weak_actor_zone()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var weakActorZoneId = ZoneTable.CreateZone( context, 1 );
+                var groupZoneId = ZoneTable.CreateZone( context, 1 );
+                var groupId = GroupTable.CreateGroup( context, 1, groupZoneId );
+                var weakActorId = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), weakActorZoneId );
+
+                WeakActorTable.Invoking( sut => sut.AddIntoGroup( context, 1, groupId, weakActorId ) )
+                              .Should()
+                              .Throw<SqlDetailedException>();
+            }
+        }
+    }
+}

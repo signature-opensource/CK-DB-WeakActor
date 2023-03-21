@@ -5,6 +5,18 @@ begin
 
     inject
     "
+        if exists
+        (
+            select 1
+            from CK.tZone
+            where ZoneId = @GroupId
+        )
+        begin
+            ;throw 50000, 'WeakActor.AddToZoneForbidden', 1;
+        end
+
+        --<CheckZoneRange>
+
         if not exists
         (
             select 1
@@ -13,7 +25,11 @@ begin
             where g.GroupId = @GroupId
                 and w.WeakActorId = @weakActorId
         )
-        throw 50000, 'WeakActor.OutOfZone', 1;
+        begin
+            ;throw 50000, 'WeakActor.OutOfZone', 1;
+        end
+
+        --</CheckZoneRange>
     "
     into PreWeakActorAdd
 

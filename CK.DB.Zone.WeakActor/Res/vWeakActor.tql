@@ -3,6 +3,9 @@ create transformer on CK.vWeakActor
 as
 begin
 
-    add column ZoneId;
+    replace single {DisplayName = w.WeakActorName}
+    with "DisplayName = w.WeakActorName + N'(#Zone-' + cast(w.ZoneId as varchar) collate Latin1_General_100_CI_AI + N')'";
+
+    add column w.ZoneId;
 
 end
