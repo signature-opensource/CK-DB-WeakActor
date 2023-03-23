@@ -1,0 +1,14 @@
+-- SetupConfig: {}
+create transformer on CK.vWeakActor
+as
+begin
+
+replace single {DisplayName = w.WeakActorName + N'(#Zone-' + cast(w.ZoneId as varchar) collate Latin1_General_100_CI_AI + N')'}
+with "DisplayName = w.WeakActorName collate Latin1_General_100_CI_AI + N'(' + g.GroupName + N')'"
+
+inject "
+join CK.tGroup g on g.GroupId = w.ZoneId
+"
+after single {from CK.tWeakActor w};
+
+end
