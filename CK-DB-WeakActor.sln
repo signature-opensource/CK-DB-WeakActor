@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.DB.Zone.WeakActor.Simple
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.DB.Zone.WeakActor.SimpleNaming.Tests", "Tests\CK.DB.Zone.WeakActor.SimpleNaming.Tests\CK.DB.Zone.WeakActor.SimpleNaming.Tests.csproj", "{B6DA3B70-30B6-433A-8063-D83D61BDD013}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CK.DB.HZone.WeakActor.SimpleNaming.Tests", "Tests\CK.DB.HZone.WeakActor.SimpleNaming.Tests\CK.DB.HZone.WeakActor.SimpleNaming.Tests.csproj", "{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{B6DA3B70-30B6-433A-8063-D83D61BDD013}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6DA3B70-30B6-433A-8063-D83D61BDD013}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6DA3B70-30B6-433A-8063-D83D61BDD013}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +89,7 @@ Global
 		{3AAFB38D-BD79-498F-A686-06173837A6E6} = {5E754B9E-84B8-426A-95B0-858D3EDCC19B}
 		{FB3F47CC-297E-49FC-A1D9-EB9E892F4F4E} = {5E754B9E-84B8-426A-95B0-858D3EDCC19B}
 		{B6DA3B70-30B6-433A-8063-D83D61BDD013} = {5E754B9E-84B8-426A-95B0-858D3EDCC19B}
+		{5BF1C5BB-BC0D-499A-B148-F7909B06D2A7} = {5E754B9E-84B8-426A-95B0-858D3EDCC19B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5044F9DA-815D-48CE-A4EE-9FA49432D361}

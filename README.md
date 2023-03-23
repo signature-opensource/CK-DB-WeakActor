@@ -32,3 +32,6 @@ You can identity any weak actor with an id, and monitor it with its unique coupl
 Extends the CK.DB.Zone to be hierarchical. Thanks to this package, Zones (that are Groups) can be
 subordinated to a parent Zone.
 
+## Zone.WeakActor.SimpleNaming
+
+Extend the CK.DB.Zone.SimpleNaming Package. The only change is the view CK.vWeakActor **DisplayName** that get a name like `WeakActorName(ZoneGroupName)` instead of `WeakActorName(#-ZoneId)`
