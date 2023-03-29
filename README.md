@@ -1,8 +1,14 @@
 # CK-DB-Actor-WeakActor
 
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/todo?svg=true)](https://ci.appveyor.com/project/Signature-OpenSource/ck-db-WeakActor)
-[![Nuget](https://img.shields.io/nuget/vpre/CK.DB.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.WeakActor/)
-[![Licence](https://img.shields.io/github/license/Invenietis/CK-DB-WeakActor.svg)](https://github.com/Invenietis/CK-DB-WeakActor/blob/develop/LICENSE)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/signature-opensource/CK-DB-WeakActor?svg=true)](https://ci.appveyor.com/project/Signature-OpenSource/ck-db-WeakActor)
+[![Licence](https://img.shields.io/github/license/signature-opensource/CK-DB-WeakActor.svg)](https://github.com/signature-opensource/CK-DB-WeakActor/blob/develop/LICENSE)
+
+| CK.DB                       | Nuget                                                                                                                                                  |
+|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Actor.WeakActor             | [![Nuget](https://img.shields.io/nuget/vpre/CK.DB.Actor.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.Actor.WeakActor/)                         |
+| Zone.WeakActor              | [![Nuget](https://img.shields.io/nuget/vpre/CK.DB.Zone.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.Zone.WeakActor/)                           |
+| Zone.WeakActor.SimpleNaming | [![Nuget](https://img.shields.io/nuget/vpre/CK.DB.Zone.WeakActor.SimpleNaming.svg)](https://www.nuget.org/packages/CK.DB.Zone.WeakActor.SimpleNaming/) |
+| HZone.WeakActor             | [![Nuget](https://img.shields.io/nuget/vpre/CK.DB.HZone.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.HZone.WeakActor/)                         |
 
 A WeakActor is not a user.
 
