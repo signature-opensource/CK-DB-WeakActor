@@ -5,7 +5,7 @@ begin
 
 inject
 "
-    if ((select CK.fIsWeakActorNameInHierarchy(@ZoneId, @WeakActorName)) = 1)
+    if ((select CK.fIsWeakActorNameInHierarchy(@ZoneId, @WeakActorName, default)) = 1)
     begin
         ;throw 500000, 'WeakActor.WeakActorNameShouldBeUniqueInHZone', 1;
     end

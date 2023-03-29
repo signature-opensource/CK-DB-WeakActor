@@ -2,7 +2,8 @@
 create function CK.fIsWeakActorNameInHierarchy
 (
     @ZoneId int,
-    @WeakActorName nvarchar(255)
+    @WeakActorName nvarchar(255),
+    @ZoneIdToExclude int = -1
 )
     returns bit
 as
@@ -30,6 +31,7 @@ begin
     from AllZonesInHierarchy a
     join CK.tWeakActor w on w.ZoneId = a.ZoneIdInHierarchy
     where WeakActorName = @WeakActorName
+      and a.ZoneIdInHierarchy != @ZoneIdToExclude;
 
     return (@NameAlreadyExists);
 
