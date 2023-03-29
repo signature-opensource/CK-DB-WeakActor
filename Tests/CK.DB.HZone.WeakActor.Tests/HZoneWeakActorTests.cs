@@ -9,6 +9,7 @@ using CK.DB.Zone;
 using static CK.Testing.DBSetupTestHelper;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
 
 namespace CK.DB.HZone.WeakActor.Tests
 {
@@ -247,5 +248,243 @@ namespace CK.DB.HZone.WeakActor.Tests
                               .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
             }
         }
+
+        #region sWeakActorZoneMove
+
+        [Test]
+        public void should_move_weak_actor_to_a_new_zone_in_a_perfect_world()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var zoneId = ZoneTable.CreateZone( context, 1 );
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget );
+
+                var zoneIdResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    new { weakActorId }
+                );
+                zoneIdResult.Should().Be( zoneIdTarget );
+
+                var oldProfileResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    new { weakActorId, zoneIdTarget }
+                );
+                oldProfileResult.Should().Be( 1 );
+
+                var newProfileResult = context[WeakActorTable].Query<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    new { weakActorId, zoneId }
+                );
+                newProfileResult.Should().BeEmpty();
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
+            }
+        }
+
+        [Test]
+        public void can_move_a_weak_actor_to_a_new_zone_in_the_same_hierarchy()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var baseZoneId = ZoneTable.CreateZone( context, 1 );
+                var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1, baseZoneId );
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget );
+
+                var zoneIdResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    new { weakActorId }
+                );
+                zoneIdResult.Should().Be( zoneIdTarget );
+
+                var newProfileResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    new { weakActorId, zoneIdTarget }
+                );
+                newProfileResult.Should().Be( 1 );
+
+                var oldProfileResult = context[WeakActorTable].Query<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    new { weakActorId, zoneId }
+                );
+                oldProfileResult.Should().BeEmpty();
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
+            }
+        }
+
+        [Test]
+        public void should_throw_when_moving_a_weak_actor_to_a_new_hierarchy_where_the_name_clash()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var baseZoneId = ZoneTable.CreateZone( context, 1 );
+                var targetBaseZoneId = ZoneTable.CreateZone( context, 1 );
+                var weakActorName = Guid.NewGuid().ToString();
+                WeakActorTable.Create( context, 1, weakActorName, targetBaseZoneId );
+
+                var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1, targetBaseZoneId );
+
+                WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
+                              .Should().Throw<SqlDetailedException>()
+                              .WithInnerException<SqlException>()
+                              .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
+            }
+        }
+
+        [Test]
+        public void should_not_throw_when_moving_a_weak_actor_with_a_new_unique_name()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var zoneId = ZoneTable.CreateZone( context, 1 );
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
+                WeakActorTable.Create( context, 1, weakActorName, zoneIdTarget );
+
+
+                var displayName = context[WeakActorTable].QuerySingle<string>
+                (
+                    "select DisplayName from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    new { weakActorId }
+                );
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, newWeakActorName: displayName );
+            }
+        }
+
+        [Test]
+        public void should_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group_out_of_new_hierarchy()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var baseZoneId = ZoneTable.CreateZone( context, 1 );
+                var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
+                var groupId = GroupTable.CreateGroup( context, 1, baseZoneId );
+
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+                WeakActorTable.AddIntoGroup( context, 1, groupId, weakActorId );
+
+                var baseZoneIdTarget = ZoneTable.CreateZone( context, 1 );
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1, baseZoneIdTarget );
+
+                WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
+                              .Should().Throw<SqlDetailedException>()
+                              .WithInnerException<SqlException>()
+                              .WithMessage( "*WeakActor.IsInAGroup*" );
+            }
+        }
+
+        [Test]
+        public void can_move_a_weak_actor_to_a_new_zone_while_only_being_in_a_group_inside_new_hierarchy()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var baseZoneId = ZoneTable.CreateZone( context, 1 );
+                var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
+                var groupId = GroupTable.CreateGroup( context, 1, baseZoneId );
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1, baseZoneId );
+
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+                WeakActorTable.AddIntoGroup( context, 1, groupId, weakActorId );
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget );
+
+                var zoneIdResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    new { weakActorId }
+                );
+                zoneIdResult.Should().Be( zoneIdTarget );
+
+                var newProfileResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    new { weakActorId, zoneIdTarget }
+                );
+                newProfileResult.Should().Be( 1 );
+
+                var oldProfileResult = context[WeakActorTable].Query<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    new { weakActorId, zoneId }
+                );
+                oldProfileResult.Should().BeEmpty();
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
+            }
+
+        }
+
+        [Test]
+        public void should_not_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group_with_option_1_intersect()
+        {
+            using( var context = new SqlStandardCallContext() )
+            {
+                var zoneId = ZoneTable.CreateZone( context, 1 );
+                var weakActorName = Guid.NewGuid().ToString();
+                var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
+
+                var groupId = GroupTable.CreateGroup( context, 1, zoneId );
+                WeakActorTable.AddIntoGroup( context, 1, groupId, weakActorId );
+
+                var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: Intersect );
+
+                var zoneIdResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    new { weakActorId }
+                );
+                zoneIdResult.Should().Be( zoneIdTarget );
+
+                var oldProfileResult = context[WeakActorTable].QuerySingle<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    new { weakActorId, zoneIdTarget }
+                );
+                oldProfileResult.Should().Be( 1 );
+
+                var newProfileResult = context[WeakActorTable].Query<int>
+                (
+                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    new { weakActorId, zoneId }
+                );
+                newProfileResult.Should().BeEmpty();
+
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
+
+                context[WeakActorTable].Query
+                                       (
+                                           "select * from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId",
+                                           new { weakActorId, groupId }
+                                       )
+                                       .Should().BeEmpty();
+            }
+        }
+
+        #endregion
     }
 }

@@ -1,0 +1,115 @@
+﻿-- SetupConfig: {}
+create transformer on CK.sWeakActorZoneMove
+as
+begin
+
+    inject "
+        /*
+    "
+    after single "--<AnyGroupConflicting";
+
+    inject "
+        */
+    "
+    before single "--</AnyGroupConflicting";
+
+    inject "
+        declare @HasAnyGroupOutOfHierarchy bit = 0;
+
+        with AllZonesInNewHierarchy as
+        (
+            select zDescendants.ZoneId as ZoneIdInHierarchy
+            from CK.tZone zone
+            join CK.tZone zDescendants on zDescendants.HierarchicalId.IsDescendantOf
+            (
+                zone.HierarchicalId.GetAncestor
+                ((
+                    -- 0 is the minimum value that can be passed as argument.
+                    select top (1) max(HLevel)
+                    from (values (0), (cast(zone.HierarchicalId.GetLevel() as int) - 1)) as HLevels(HLevel)
+                ))
+            ) = 1
+            where zone.ZoneId = @NewZoneId
+        ),
+
+        AllGroupsInNewHierarchy as
+        (
+            select GroupId
+            from AllZonesInNewHierarchy az
+            join CK.tGroup g on g.ZoneId = az.ZoneIdInHierarchy
+        )
+
+        select @HasAnyGroupOutOfHierarchy = 1
+        from CK.tActorProfile ap
+        left join AllGroupsInNewHierarchy ag on ag.GroupId = ap.GroupId
+        where ap.ActorId = @WeakActorId
+          and ap.GroupId != @WeakActorId
+          and ap.GroupId != @CurrentZoneId
+          and ag.GroupId is null
+
+        if (@HasAnyGroupOutOfHierarchy = 1)
+    "
+    before single "--</AnyGroupConflicting";
+
+inject "
+        left join AllGroupsInNewHierarchy ag on ag.GroupId = ap.GroupId
+"
+after last out of 2 {from CK.tActorProfile ap}
+
+inject "
+          and ag.GroupId is null
+"
+after last out of 2 {and ap.GroupId != @CurrentZoneId}
+
+   inject "
+       with AllZonesInNewHierarchy as
+        (
+            select zDescendants.ZoneId as ZoneIdInHierarchy
+            from CK.tZone zone
+            join CK.tZone zDescendants on zDescendants.HierarchicalId.IsDescendantOf
+            (
+                zone.HierarchicalId.GetAncestor
+                ((
+                    -- 0 is the minimum value that can be passed as argument.
+                    select top (1) max(HLevel)
+                    from (values (0), (cast(zone.HierarchicalId.GetLevel() as int) - 1)) as HLevels(HLevel)
+                ))
+            ) = 1
+            where zone.ZoneId = @NewZoneId
+        ),
+
+        AllGroupsInNewHierarchy as
+        (
+            select GroupId
+            from AllZonesInNewHierarchy az
+            join CK.tGroup g on g.ZoneId = az.ZoneIdInHierarchy
+        )
+
+    "
+    after single "--<GroupsToRemove";
+
+    inject "
+        -- The common usage would be using a @NewWeakActorName,
+        -- so the @WeakActorName is resolved only here.
+        declare @WeakActorName nvarchar(255);
+        select @WeakActorName = WeakActorName
+        from CK.tWeakActor w
+        where w.WeakActorId = @WeakActorId;
+
+        if (select CK.fIsWeakActorNameInHierarchy(@NewZoneId, @WeakActorName, @CurrentZoneId)) = 1
+        begin
+            ;throw 50000, 'WeakActor.WeakActorNameShouldBeUniqueInHZone', 1;
+        end
+
+    "
+    into "PreWeakActorUpdateWithoutNewWeakActorName"
+
+    inject "
+        if (select CK.fIsWeakActorNameInHierarchy(@NewZoneId, @NewWeakActorName, @CurrentZoneId)) = 1
+        begin
+            ;throw 50000, 'WeakActor.WeakActorNameShouldBeUniqueInHZone', 1;
+        end
+    "
+    into "PreWeakActorUpdateWithNewWeakActorName"
+
+end

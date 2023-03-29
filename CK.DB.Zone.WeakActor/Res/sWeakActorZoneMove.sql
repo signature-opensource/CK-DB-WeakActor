@@ -28,6 +28,7 @@ begin
 
     if @Option = 0 -- None
     begin
+        --<AnyGroupConflicting>
         if exists
         (
             select GroupId
@@ -36,6 +37,7 @@ begin
               and ap.GroupId != @WeakActorId
               and ap.GroupId != @CurrentZoneId
         )
+        --</AnyGroupConflicting>
         begin
             ;throw 50000, 'WeakActor.IsInAGroup', 1
         end
@@ -46,11 +48,13 @@ begin
         declare @GroupMatcher cursor;
 
         set @GroupMatcher = cursor local fast_forward for
+            --<GroupsToRemove>
             select GroupId
             from CK.tActorProfile ap
             where ap.ActorId = @WeakActorId
               and ap.GroupId != @WeakActorId
               and ap.GroupId != @CurrentZoneId;
+            --</GroupsToRemove>
 
         open @GroupMatcher;
         fetch from @GroupMatcher into @GroupId;
@@ -76,12 +80,14 @@ begin
     -- Here it will throw if WeakActorName is not unique within the Zone.
     if (@NewWeakActorName is null)
     begin
+        --<PreWeakActorUpdateWithoutNewWeakActorName />
         update CK.tWeakActor
         set ZoneId = @NewZoneId
         where WeakActorId = @WeakActorId;
     end
     else
     begin
+        --<PreWeakActorUpdateWithNewWeakActorName />
         update CK.tWeakActor
         set ZoneId        = @NewZoneId,
             WeakActorName = @NewWeakActorName

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using CK.Core;
+using CK.DB.Zone.WeakActor;
 using CK.SqlServer;
 
 namespace CK.DB.HZone.WeakActor
@@ -11,6 +12,11 @@ namespace CK.DB.HZone.WeakActor
     [SetupName( "CK.WeakActorTable-HZone" )]
     [Versions( "1.0.0" )]
     [SqlObjectItem( "transform:sGroupWeakActorAdd, transform:sWeakActorCreate" )]
+    //TODO: use the transformer instead of the sql when this error is fixed :
+    // - Error: ¤Error: Select statement expected. @96,36
+    // It is triggered by the CTE under the cursor.
+    // To do so, uncomment next line and remove the SP creation from settle script (just delete it).
+    // [SqlObjectItem( "transform:sWeakActorZoneMove" )]
     public abstract partial class WeakActorTable : Zone.WeakActor.WeakActorTable
     {
         void StObjConstruct( HZone.ZoneTable hZoneTable ) { }
