@@ -1,7 +1,8 @@
 # CK-DB-Actor-WeakActor
 
-[![Nuget](https://img.shields.io/nuget/vpre/CK.DB.Actor.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.Actor.WeakActor/)
-[![Licence](https://img.shields.io/github/license/Invenietis/CK-DB-Actor-WeakActor.svg)](https://github.com/Invenietis/CK-DB-Actor-WeakActor/blob/develop/LICENSE)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/todo?svg=true)](https://ci.appveyor.com/project/Signature-OpenSource/ck-db-WeakActor)
+[![Nuget](https://img.shields.io/nuget/vpre/CK.DB.WeakActor.svg)](https://www.nuget.org/packages/CK.DB.WeakActor/)
+[![Licence](https://img.shields.io/github/license/Invenietis/CK-DB-WeakActor.svg)](https://github.com/Invenietis/CK-DB-WeakActor/blob/develop/LICENSE)
 
 A WeakActor is not a user.
 
