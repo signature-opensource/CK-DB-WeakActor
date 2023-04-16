@@ -66,7 +66,7 @@ namespace CK.DB.Actor.WeakActor.Tests
 
                 await Table.AddIntoGroupAsync( context, 1, groupId, weakActorId );
 
-                var sql = "select count(*) from CK.tActorProfile where GroupId = @GroupId and ActorId = @WeakActorId";
+                var sql = "select count(*) from CK.tActorProfile where GroupId = @groupId and ActorId = @weakActorId";
                 context[Table].QuerySingle<int>( sql, new { groupId, weakActorId } )
                               .Should()
                               .Be( 1 );

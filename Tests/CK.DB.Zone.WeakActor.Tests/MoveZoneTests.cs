@@ -1,4 +1,4 @@
-﻿using CK.Core;
+using CK.Core;
 using CK.SqlServer;
 using FluentAssertions;
 using NUnit.Framework;
@@ -32,21 +32,21 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 var zoneIdResult = context[WeakActorTable].QuerySingle<int>
                 (
-                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                     new { weakActorId }
                 );
                 zoneIdResult.Should().Be( zoneIdTarget );
 
                 var oldProfileResult = context[WeakActorTable].QuerySingle<int>
                 (
-                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                     new { weakActorId, zoneIdTarget }
                 );
                 oldProfileResult.Should().Be( 1 );
 
                 var newProfileResult = context[WeakActorTable].Query<int>
                 (
-                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                     new { weakActorId, zoneId }
                 );
                 newProfileResult.Should().BeEmpty();
@@ -88,7 +88,7 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 var displayName = context[WeakActorTable].QuerySingle<string>
                 (
-                    "select DisplayName from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    "select DisplayName from CK.vWeakActor where WeakActorId=@weakActorId",
                     new { weakActorId }
                 );
                 WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, newWeakActorName: displayName );
@@ -139,21 +139,21 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 var zoneIdResult = context[WeakActorTable].QuerySingle<int>
                 (
-                    "select ZoneId from CK.vWeakActor where WeakActorId=@WeakActorId",
+                    "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                     new { weakActorId }
                 );
                 zoneIdResult.Should().Be( zoneIdTarget );
 
                 var oldProfileResult = context[WeakActorTable].QuerySingle<int>
                 (
-                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneIdTarget",
+                    "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                     new { weakActorId, zoneIdTarget }
                 );
                 oldProfileResult.Should().Be( 1 );
 
                 var newProfileResult = context[WeakActorTable].Query<int>
                 (
-                    "select 1 from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@ZoneId",
+                    "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                     new { weakActorId, zoneId }
                 );
                 newProfileResult.Should().BeEmpty();
@@ -162,7 +162,7 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 context[WeakActorTable].Query
                                        (
-                                           "select * from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId",
+                                           "select * from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId",
                                            new { weakActorId, groupId }
                                        )
                                        .Should().BeEmpty();

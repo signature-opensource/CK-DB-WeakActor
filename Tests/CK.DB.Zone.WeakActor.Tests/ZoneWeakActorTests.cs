@@ -1,4 +1,4 @@
-﻿using CK.Core;
+using CK.Core;
 using CK.SqlServer;
 using FluentAssertions;
 using NUnit.Framework;
@@ -171,7 +171,7 @@ namespace CK.DB.Zone.WeakActor.Tests
                 var groupId = GroupTable.CreateGroup( context, 1, zoneId1 );
 
                 var sqlCheckGroup =
-                "select count(*) from CK.tActorProfile where GroupId=@GroupId and ActorId=@WeakActorId";
+                "select count(*) from CK.tActorProfile where GroupId=@groupId and ActorId=@weakActorId";
                 var checkGroupParams = new { groupId, weakActorId };
 
                 var checkGroupBefore = context[WeakActorTable].QuerySingle<int>( sqlCheckGroup, checkGroupParams );
@@ -202,7 +202,7 @@ from CK.tWeakActor
 where WeakActorId=@WeakActorId
     and ZoneId=@ZoneId;
 ",
-                                           new { ZoneId = zoneId2, weakActorId }
+                                           new { ZoneId = zoneId2, WeakActorId = weakActorId }
                                        )
                                        .Should().Be( 0 );
 
@@ -219,7 +219,7 @@ from CK.tWeakActor
 where WeakActorId=@WeakActorId
     and ZoneId=@ZoneId;
 ",
-                                           new { ZoneId = zoneId1, weakActorId }
+                                           new { ZoneId = zoneId1, WeakActorId = weakActorId }
                                        )
                                        .Should().Be( 1 );
             }
@@ -297,7 +297,7 @@ where WeakActorId=@WeakActorId
 
                 context[WeakActorTable].QuerySingle<int>
                                        (
-                                           "select count(*) from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId;",
+                                           "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                            new { weakActorId, GroupId = zoneId }
                                        )
                                        .Should().Be( 1 );
@@ -322,7 +322,7 @@ where WeakActorId=@WeakActorId
 
                 context[WeakActorTable].QuerySingle<int>
                                        (
-                                           "select count(*) from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId;",
+                                           "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId;",
                                            new { weakActorId, groupId }
                                        )
                                        .Should().Be( 1 );
@@ -331,7 +331,7 @@ where WeakActorId=@WeakActorId
 
                 context[WeakActorTable].QuerySingle<int>
                                        (
-                                           "select count(*) from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId;",
+                                           "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId;",
                                            new { weakActorId, groupId }
                                        )
                                        .Should().Be( 0 );
@@ -350,7 +350,7 @@ where WeakActorId=@WeakActorId
 
                 context[WeakActorTable].QuerySingle<int>
                                        (
-                                           "select count(*) from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId;",
+                                           "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                            new { weakActorId, GroupId = zoneId }
                                        )
                                        .Should().Be( 1 );
@@ -361,7 +361,7 @@ where WeakActorId=@WeakActorId
 
                 context[WeakActorTable].QuerySingle<int>
                                        (
-                                           "select count(*) from CK.tActorProfile where ActorId=@WeakActorId and GroupId=@GroupId;",
+                                           "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                            new { weakActorId, GroupId = zoneId }
                                        )
                                        .Should().Be( 1 );
