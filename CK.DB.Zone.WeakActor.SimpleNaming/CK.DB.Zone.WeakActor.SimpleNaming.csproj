@@ -5,8 +5,8 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="18.0.1--0048-develop" />
-    <PackageReference Include="CK.SqlServer.Setup.Model" Version="23.0.1--0046-develop" />
+    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="18.0.1--0049-develop" />
+    <PackageReference Include="CK.SqlServer.Setup.Model" Version="23.0.1--0047-develop" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" Exclude="bin\**;obj\**;CodeCakeBuilder\**;packages\**;@(EmbeddedResource)" />
