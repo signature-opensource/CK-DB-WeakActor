@@ -1,0 +1,13 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupMove
+as
+begin
+
+    inject "   					if exists(select 1 from CK.tWeakActor where WeakActorId = @ExtraUserIdInZone)
+					begin
+						;throw 50000, 'Group.WeakActorCannotUseAutoUserRegistration', 1;
+					end
+					"
+    after single "-- 2 - AutoUserRegistration";
+
+end

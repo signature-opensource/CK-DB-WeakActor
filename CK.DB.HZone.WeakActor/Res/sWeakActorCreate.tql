@@ -1,0 +1,15 @@
+-- SetupConfig: {}
+create transformer on CK.sWeakActorCreate
+as
+begin
+
+inject
+"
+    if ((select CK.fIsWeakActorNameInHierarchy(@ZoneId, @WeakActorName, default)) = 1)
+    begin
+        ;throw 500000, 'WeakActor.WeakActorNameShouldBeUniqueInHZone', 1;
+    end
+"
+after single "--<PreCreate revert />"
+
+end

@@ -1,0 +1,28 @@
+-- SetupConfig: {}
+create transformer on CK.sWeakActorCreate
+as
+begin
+    add parameter @ZoneId int = 0;
+
+    in single part {insert into CK.tWeakActor}
+    begin
+        add column ZoneId = @ZoneId;
+    end
+
+    inject
+    "
+    if @ZoneId < 0 throw 50000, 'Zone.InvalidId', 1;
+    "
+    after single {if @ActorId <= 0 throw 50000, 'Security.AnonymousNotAllowed', 1;}
+
+    inject
+    "
+    if @ZoneId > 0
+    begin
+        insert into CK.tActorProfile(ActorId, GroupId) values (@WeakActorIdResult, @ZoneId);
+    end
+    "
+    after single part {insert into CK.tWeakActor}
+
+
+end
