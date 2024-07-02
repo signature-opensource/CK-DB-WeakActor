@@ -14,6 +14,6 @@
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.HZone" Version="20.0.1--0065-develop" />
+    <PackageReference Include="CK.DB.HZone" Version="20.0.1--0066-develop" />
   </ItemGroup>
 </Project>

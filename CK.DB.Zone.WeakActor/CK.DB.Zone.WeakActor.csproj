@@ -11,7 +11,7 @@
     <ProjectReference Include="..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.Zone" Version="20.0.1--0065-develop" />
+    <PackageReference Include="CK.DB.Zone" Version="20.0.1--0066-develop" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
