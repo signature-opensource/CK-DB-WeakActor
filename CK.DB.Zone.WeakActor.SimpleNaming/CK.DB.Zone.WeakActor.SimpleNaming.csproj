@@ -5,7 +5,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="0.0.0--04ytpj1-develop" />
+    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="0.0.0--04ytpq5-develop" />
     <PackageReference Include="CK.SqlServer.Setup.Model" Version="0.0.0--04ytpj0-develop" />
   </ItemGroup>
   <ItemGroup>
