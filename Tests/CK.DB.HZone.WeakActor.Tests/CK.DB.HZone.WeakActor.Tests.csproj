@@ -5,11 +5,11 @@
     <IsPackable>True</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.HZone.Tests" Version="0.0.0--04yw01x-develop" />
-    <PackageReference Include="CK.DB.Tests.NUnit" Version="0.0.0--04yw01x-develop" />
+    <PackageReference Include="CK.DB.HZone.Tests" Version="0.0.0--04yxt1q-develop" />
+    <PackageReference Include="CK.DB.Tests.NUnit" Version="0.0.0--04yxt1o-develop" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="CK.SqlServer.Dapper" Version="0.0.0--04yw01x-develop" />
+    <PackageReference Include="CK.SqlServer.Dapper" Version="0.0.0--04yxt1o-develop" />
     <ProjectReference Include="..\..\CK.DB.HZone.WeakActor\CK.DB.HZone.WeakActor.csproj" />
     <ProjectReference Include="..\CK.DB.Zone.WeakActor.Tests\CK.DB.Zone.WeakActor.Tests.csproj" />
   </ItemGroup>
