@@ -1,11 +1,10 @@
-﻿using CK.Core;
+using CK.Core;
 using CK.SqlServer;
+using CK.Testing;
 using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Linq;
 using static CK.Testing.MonitorTestHelper;
-using Dapper;
 
 namespace CK.DB.Zone.WeakActor.Tests
 {
@@ -18,7 +17,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_throw_when_add_weak_actor_into_a_group_out_of_weak_actor_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var weakActorZoneId = ZoneTable.CreateZone( context, 1 );
                 var groupZoneId = ZoneTable.CreateZone( context, 1 );

@@ -1,15 +1,13 @@
 using CK.Core;
+using CK.DB.Zone;
 using CK.SqlServer;
+using CK.Testing;
+using Dapper;
 using FluentAssertions;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using CK.DB.Zone;
 using static CK.Testing.MonitorTestHelper;
-using Dapper;
-using Microsoft.Data.SqlClient;
-using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
 
 namespace CK.DB.HZone.WeakActor.Tests
 {
@@ -26,7 +24,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void can_be_added_to_every_group_inside_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var groupId1 = GroupTable.CreateGroup( context, 1, zoneId );
@@ -43,7 +41,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void can_add_weak_actor_to_a_group_in_hierarchy()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var rootZone = ZoneTable.CreateZone( context, 1 );
                 var zone = ZoneTable.CreateZone( context, 1, rootZone );
@@ -58,7 +56,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void move_a_simple_zone_containing_a_weak_actor_with_option_0_none_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var rootZoneOrigin = ZoneTable.CreateZone( context, 1 );
                 var rootZoneTarget = ZoneTable.CreateZone( context, 1 );
@@ -82,7 +80,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void move_a_simple_zone_not_containing_any_weak_actor_with_option_1_none_should_not_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var rootZoneOrigin = ZoneTable.CreateZone( context, 1 );
                 var rootZoneTarget = ZoneTable.CreateZone( context, 1 );
@@ -111,10 +109,7 @@ namespace CK.DB.HZone.WeakActor.Tests
 
                 WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneUnderTest );
 
-                ZoneTable.Invoking
-                         (
-                             sut => sut.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.Intersect )
-                         )
+                ZoneTable.Invoking( sut => sut.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.Intersect ) )
                          .Should()
                          .Throw<SqlDetailedException>()
                          .WithInnerException<SqlException>()
@@ -125,7 +120,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void move_a_simple_zone_containing_a_weak_actor_with_option_2_none_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var rootZoneOrigin = ZoneTable.CreateZone( context, 1 );
                 var rootZoneTarget = ZoneTable.CreateZone( context, 1 );
@@ -133,17 +128,11 @@ namespace CK.DB.HZone.WeakActor.Tests
 
                 WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneUnderTest );
 
-                ZoneTable.Invoking
-                         (
-                             sut => sut.MoveZone
-                             (
-                                 context,
-                                 1,
-                                 zoneUnderTest,
-                                 rootZoneTarget,
-                                 GroupMoveOption.AutoUserRegistration
-                             )
-                         )
+                ZoneTable.Invoking( sut => sut.MoveZone( context,
+                                                         1,
+                                                         zoneUnderTest,
+                                                         rootZoneTarget,
+                                                         GroupMoveOption.AutoUserRegistration ) )
                          .Should()
                          .Throw<SqlDetailedException>()
                          .WithInnerException<SqlException>()
@@ -154,7 +143,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_find_a_weak_actor_name_in_hierarchy()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var weakActorName = Guid.NewGuid().ToString();
                 var rootZone = ZoneTable.CreateZone( context, 1 );
@@ -181,7 +170,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void create_a_weak_actor_should_throw_when_weak_actor_name_candidate_is_in_hierarchy_already()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var weakActorName = Guid.NewGuid().ToString();
                 var rootZone = ZoneTable.CreateZone( context, 1 );
@@ -254,7 +243,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_move_weak_actor_to_a_new_zone_in_a_perfect_world()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -292,7 +281,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void can_move_a_weak_actor_to_a_new_zone_in_the_same_hierarchy()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var baseZoneId = ZoneTable.CreateZone( context, 1 );
                 var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
@@ -331,7 +320,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_throw_when_moving_a_weak_actor_to_a_new_hierarchy_where_the_name_clash()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var baseZoneId = ZoneTable.CreateZone( context, 1 );
                 var targetBaseZoneId = ZoneTable.CreateZone( context, 1 );
@@ -353,7 +342,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_not_throw_when_moving_a_weak_actor_with_a_new_unique_name()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -375,7 +364,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group_out_of_new_hierarchy()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var baseZoneId = ZoneTable.CreateZone( context, 1 );
                 var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
@@ -398,7 +387,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void can_move_a_weak_actor_to_a_new_zone_while_only_being_in_a_group_inside_new_hierarchy()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var baseZoneId = ZoneTable.CreateZone( context, 1 );
                 var zoneId = ZoneTable.CreateZone( context, 1, baseZoneId );
@@ -440,7 +429,7 @@ namespace CK.DB.HZone.WeakActor.Tests
         [Test]
         public void should_not_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group_with_option_1_intersect()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -451,7 +440,7 @@ namespace CK.DB.HZone.WeakActor.Tests
 
                 var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
 
-                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: Intersect );
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: Zone.WeakActor.WeakActorZoneMoveOption.Intersect );
 
                 var zoneIdResult = context[WeakActorTable].QuerySingle<int>
                 (
@@ -476,11 +465,7 @@ namespace CK.DB.HZone.WeakActor.Tests
 
                 WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
 
-                context[WeakActorTable].Query
-                                       (
-                                           "select * from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId",
-                                           new { weakActorId, groupId }
-                                       )
+                context[WeakActorTable].Query( "select * from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId", new { weakActorId, groupId } )
                                        .Should().BeEmpty();
             }
         }

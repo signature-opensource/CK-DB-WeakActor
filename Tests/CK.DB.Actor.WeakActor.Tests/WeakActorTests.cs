@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using static CK.Testing.MonitorTestHelper;
 using Dapper;
+using CK.Testing;
 
 namespace CK.DB.Actor.WeakActor.Tests
 {
@@ -17,7 +18,7 @@ namespace CK.DB.Actor.WeakActor.Tests
         [Test]
         public async Task anonymous_cannot_create_weak_actors_Async()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 await Table.Invoking( sut => sut.CreateAsync( context, 0, Guid.NewGuid().ToString() ) )
                            .Should()
@@ -28,7 +29,7 @@ namespace CK.DB.Actor.WeakActor.Tests
         [Test]
         public async Task can_create_weak_actor_Async()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
                 weakActorId.Should().BeGreaterThan( 0 );
@@ -38,7 +39,7 @@ namespace CK.DB.Actor.WeakActor.Tests
         [Test]
         public async Task can_destroy_weak_actor_Async()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
 
@@ -54,7 +55,7 @@ namespace CK.DB.Actor.WeakActor.Tests
             var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
             Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
 
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var groupId = await groupTable.CreateGroupAsync( context, 1 );
                 var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
@@ -76,7 +77,7 @@ namespace CK.DB.Actor.WeakActor.Tests
         [Test]
         public void create_twice_the_same_weak_actor_name_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var name = Guid.NewGuid().ToString();
                 Table.Create( context, 1, name );

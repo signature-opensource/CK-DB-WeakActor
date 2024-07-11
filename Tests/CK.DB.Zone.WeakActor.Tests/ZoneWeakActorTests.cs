@@ -8,6 +8,7 @@ using static CK.Testing.MonitorTestHelper;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
+using CK.Testing;
 
 namespace CK.DB.Zone.WeakActor.Tests
 {
@@ -20,7 +21,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void create_twice_the_same_weak_actor_name_on_different_zone_should_not_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId1 = ZoneTable.CreateZone( context, 1 );
                 var zoneId2 = ZoneTable.CreateZone( context, 1 );
@@ -36,7 +37,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_be_unique_inside_a_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var name = Guid.NewGuid().ToString();
                 var zoneId1 = ZoneTable.CreateZone( context, 1 );
@@ -52,7 +53,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_add_weak_actor_into_a_group_if_target_group_is_inside_weak_actor_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var groupId = GroupTable.CreateGroup( context, 1, zoneId );
@@ -65,7 +66,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void can_be_added_to_every_group_inside_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var groupId1 = GroupTable.CreateGroup( context, 1, zoneId );
@@ -82,7 +83,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void name_and_zone_id_should_be_unique()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -97,7 +98,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void two_weak_actors_can_be_added_to_the_same_zone()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActor1 = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneId );
@@ -109,7 +110,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void display_name_should_be_unique()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var sql = "select DisplayName from CK.vWeakActor";
 
@@ -133,7 +134,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void move_a_group_containing_a_weak_actor_with_option_0_none_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId1 = ZoneTable.CreateZone( context, 1 );
                 var zoneId2 = ZoneTable.CreateZone( context, 1 );
@@ -159,7 +160,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void move_a_group_containing_a_weak_actor_with_option_1_intersect_should_not_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId1 = ZoneTable.CreateZone( context, 1 );
                 var zoneId2 = ZoneTable.CreateZone( context, 1 );
@@ -189,38 +190,32 @@ namespace CK.DB.Zone.WeakActor.Tests
                 checkGroupAfter.Should().Be( checkGroupBefore )
                                .And.Be( 0 );
 
-                context[WeakActorTable].QuerySingle<int>
-                                       (
-                                           @"
-select count(*)
-from CK.tActorProfile
-where GroupId=@ZoneId
-    and ActorId=@WeakActorId
-union
-select count(*)
-from CK.tWeakActor
-where WeakActorId=@WeakActorId
-    and ZoneId=@ZoneId;
-",
-                                           new { ZoneId = zoneId2, WeakActorId = weakActorId }
-                                       )
+                context[WeakActorTable].QuerySingle<int>( """
+                                           select count(*)
+                                           from CK.tActorProfile
+                                           where GroupId=@ZoneId
+                                               and ActorId=@WeakActorId
+                                           union
+                                           select count(*)
+                                           from CK.tWeakActor
+                                           where WeakActorId=@WeakActorId
+                                               and ZoneId=@ZoneId;
+                                           """,
+                                           new { ZoneId = zoneId2, WeakActorId = weakActorId } )
                                        .Should().Be( 0 );
 
-                context[WeakActorTable].QuerySingle<int>
-                                       (
-                                           @"
-select count(*)
-from CK.tActorProfile
-where GroupId=@ZoneId
-    and ActorId=@WeakActorId
-union
-select count(*)
-from CK.tWeakActor
-where WeakActorId=@WeakActorId
-    and ZoneId=@ZoneId;
-",
-                                           new { ZoneId = zoneId1, WeakActorId = weakActorId }
-                                       )
+                context[WeakActorTable].QuerySingle<int>( """
+                                           select count(*)
+                                           from CK.tActorProfile
+                                           where GroupId=@ZoneId
+                                               and ActorId=@WeakActorId
+                                           union
+                                           select count(*)
+                                           from CK.tWeakActor
+                                           where WeakActorId=@WeakActorId
+                                               and ZoneId=@ZoneId;
+                                           """,
+                                           new { ZoneId = zoneId1, WeakActorId = weakActorId } )
                                        .Should().Be( 1 );
             }
         }
@@ -243,10 +238,7 @@ where WeakActorId=@WeakActorId
 
                 WeakActorTable.AddIntoGroup( context, 1, group, weakActorId1 );
 
-                GroupTable.Invoking
-                          (
-                              sut => sut.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.AutoUserRegistration )
-                          )
+                GroupTable.Invoking( sut => sut.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.AutoUserRegistration ) )
                           .Should()
                           .Throw<SqlDetailedException>();
             }
@@ -255,7 +247,7 @@ where WeakActorId=@WeakActorId
         [Test]
         public void move_group_which_is_weak_actor_zone_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId1 = ZoneTable.CreateZone( context, 1 );
                 var zoneId2 = ZoneTable.CreateZone( context, 1 );
@@ -288,7 +280,7 @@ where WeakActorId=@WeakActorId
         [Test]
         public void sZoneUserRemove_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
 
@@ -310,7 +302,7 @@ where WeakActorId=@WeakActorId
         [Test]
         public void sGroupUserRemove_should_simply_remove_the_association_with_weak_actor_from_tActorProfile()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
 
@@ -341,7 +333,7 @@ where WeakActorId=@WeakActorId
         [Test]
         public void sGroupUserRemove_which_target_a_zone_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
 
@@ -371,7 +363,7 @@ where WeakActorId=@WeakActorId
         [Test]
         public void add_a_weak_actor_to_a_group_that_is_a_zone_should_throw()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var groupZoneId = ZoneTable.CreateZone( context, 1 );

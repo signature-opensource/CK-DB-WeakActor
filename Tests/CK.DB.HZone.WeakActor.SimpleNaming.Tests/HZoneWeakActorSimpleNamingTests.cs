@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using CK.Core;
 using CK.DB.Zone;
 using CK.SqlServer;
+using CK.Testing;
 using Dapper;
 using FluentAssertions;
 using NUnit.Framework;
@@ -18,7 +19,7 @@ namespace CK.DB.HZone.WeakActor.SimpleNaming.Tests
         [Test]
         public void display_name_should_be_unique()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var sql = "select DisplayName from CK.vWeakActor";
 

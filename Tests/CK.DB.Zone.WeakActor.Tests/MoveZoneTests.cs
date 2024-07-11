@@ -1,13 +1,12 @@
 using CK.Core;
 using CK.SqlServer;
+using CK.Testing;
+using Dapper;
 using FluentAssertions;
+using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using System;
-using System.Linq;
 using static CK.Testing.MonitorTestHelper;
-using Dapper;
-using Microsoft.Data.SqlClient;
-using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
 
 namespace CK.DB.Zone.WeakActor.Tests
 {
@@ -20,7 +19,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_move_weak_actor_to_a_new_zone_in_a_perfect_world()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -58,7 +57,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_throw_when_moving_a_weak_actor_to_a_new_zone_where_name_clash()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -77,7 +76,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_not_throw_when_moving_a_weak_actor_with_a_new_unique_name()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -98,7 +97,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -109,10 +108,7 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
 
-                WeakActorTable.Invoking
-                              (
-                                  sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget, option: None )
-                              )
+                WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget, option: WeakActorZoneMoveOption.None ) )
                               .Should()
                               .Throw<SqlDetailedException>()
                               .WithInnerException<SqlException>()
@@ -123,7 +119,7 @@ namespace CK.DB.Zone.WeakActor.Tests
         [Test]
         public void should_not_throw_when_moving_a_weak_actor_to_a_new_zone_while_in_a_group_with_option_1_intersect()
         {
-            using( var context = new SqlStandardCallContext() )
+            using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
             {
                 var zoneId = ZoneTable.CreateZone( context, 1 );
                 var weakActorName = Guid.NewGuid().ToString();
@@ -134,7 +130,7 @@ namespace CK.DB.Zone.WeakActor.Tests
 
                 var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
 
-                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: Intersect );
+                WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: WeakActorZoneMoveOption.Intersect );
 
 
                 var zoneIdResult = context[WeakActorTable].QuerySingle<int>

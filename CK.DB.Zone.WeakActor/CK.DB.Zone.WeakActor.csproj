@@ -2,17 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Description>This package implements Zone.WeakActor.</Description>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="CK.DB.Zone" Version="0.0.0--04yzfbn-develop" />
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
   </ItemGroup>

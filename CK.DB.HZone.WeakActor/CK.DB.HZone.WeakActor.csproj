@@ -2,18 +2,14 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Description>This package implements Hierachical Zone.WeakActor.</Description>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\CK.DB.Zone.WeakActor\CK.DB.Zone.WeakActor.csproj" />
+    <PackageReference Include="CK.DB.HZone" Version="0.0.0--04yzfbn-develop" />
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CK.DB.HZone" Version="0.0.0--04yzfbn-develop" />
   </ItemGroup>
 </Project>
