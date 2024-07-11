@@ -4,16 +4,16 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Linq;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 using Dapper;
 
 namespace CK.DB.Zone.WeakActor.Tests
 {
     public sealed class InternalZoneWeakActorTests
     {
-        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
-        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
-        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+        WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
+        ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
+        GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
 
         [Test]
         public void should_throw_when_add_weak_actor_into_a_group_out_of_weak_actor_zone()

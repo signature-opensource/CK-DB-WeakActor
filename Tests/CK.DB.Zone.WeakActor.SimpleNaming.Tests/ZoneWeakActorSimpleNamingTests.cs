@@ -6,16 +6,16 @@ using CK.SqlServer;
 using Dapper;
 using FluentAssertions;
 using NUnit.Framework;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 using Package = CK.DB.Zone.WeakActor.SimpleNaming.Package;
 
 namespace CK.DB.Zone.WeakActor.SimpleNaming.Tests
 {
     public class ZoneWeakActorSimpleNamingTests
     {
-        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
-        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
-        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+        WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
+        ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
+        GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
 
         [Test]
         public void display_name_should_be_unique()

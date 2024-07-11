@@ -5,14 +5,14 @@ using NUnit.Framework;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 using Dapper;
 
 namespace CK.DB.Actor.WeakActor.Tests
 {
     public class WeakActorTests
     {
-        WeakActorTable Table => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
+        WeakActorTable Table => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
 
         [Test]
         public async Task anonymous_cannot_create_weak_actors_Async()
@@ -49,9 +49,9 @@ namespace CK.DB.Actor.WeakActor.Tests
         [Test]
         public async Task can_add_a_weak_actor_into_a_group_Async()
         {
-            var groupTable = TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+            var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>();
             Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
-            var userTable = TestHelper.StObjMap.StObjs.Obtain<UserTable>();
+            var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
             Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
 
             using( var context = new SqlStandardCallContext() )

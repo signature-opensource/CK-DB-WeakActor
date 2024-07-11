@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using CK.DB.Zone;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
@@ -15,13 +15,13 @@ namespace CK.DB.HZone.WeakActor.Tests
 {
     public class HZoneWeakActorTests
     {
-        Package Package => TestHelper.StObjMap.StObjs.Obtain<Package>();
+        Package Package => SharedEngine.Map.StObjs.Obtain<Package>();
 
-        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
+        WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
 
-        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
+        ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
 
-        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+        GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
 
         [Test]
         public void can_be_added_to_every_group_inside_zone()

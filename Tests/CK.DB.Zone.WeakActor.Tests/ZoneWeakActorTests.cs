@@ -4,7 +4,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using System;
 using System.Linq;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
@@ -13,9 +13,9 @@ namespace CK.DB.Zone.WeakActor.Tests
 {
     public class ZoneWeakActorTests
     {
-        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
-        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
-        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+        WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
+        ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
+        GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
 
         [Test]
         public void create_twice_the_same_weak_actor_name_on_different_zone_should_not_throw()

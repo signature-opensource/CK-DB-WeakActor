@@ -5,15 +5,15 @@ using CK.SqlServer;
 using Dapper;
 using FluentAssertions;
 using NUnit.Framework;
-using static CK.Testing.DBSetupTestHelper;
+using static CK.Testing.MonitorTestHelper;
 
 namespace CK.DB.HZone.WeakActor.SimpleNaming.Tests
 {
     public class HZoneWeakActorSimpleNamingTests
     {
-        WeakActorTable WeakActorTable => TestHelper.StObjMap.StObjs.Obtain<WeakActorTable>();
-        ZoneTable ZoneTable => TestHelper.StObjMap.StObjs.Obtain<ZoneTable>();
-        GroupTable GroupTable => TestHelper.StObjMap.StObjs.Obtain<GroupTable>();
+        WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
+        ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
+        GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
 
         [Test]
         public void display_name_should_be_unique()
