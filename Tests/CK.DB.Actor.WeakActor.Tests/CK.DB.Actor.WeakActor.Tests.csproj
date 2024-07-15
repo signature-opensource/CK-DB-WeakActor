@@ -4,13 +4,11 @@
     <Description>This package contains tests for CK.DB.WeakActor (uses CK.DB.Tests.NUnit).</Description>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
-  
   <ItemGroup>
-    <PackageReference Include="CK.DB.Tests.NUnit" Version="0.0.0--04yzfa7-develop" />
-    <PackageReference Include="CK.SqlServer.Dapper" Version="0.0.0--04yy55o-develop" />
+    <PackageReference Include="CK.DB.Tests.NUnit" Version="0.0.0--04z7c09-develop" />
+    <PackageReference Include="CK.SqlServer.Dapper" Version="0.0.0--04z7c09-develop" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <ProjectReference Include="..\..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
   </ItemGroup>
-
 </Project>

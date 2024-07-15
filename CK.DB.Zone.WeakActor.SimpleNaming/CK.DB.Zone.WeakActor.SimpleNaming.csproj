@@ -3,15 +3,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Description>This package implements Zone.WeakActor.SimpleNaming</Description>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="0.0.0--04yzfbn-develop" />
-    <PackageReference Include="CK.SqlServer.Setup.Model" Version="0.0.0--04yzfa7-develop" />
+    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="0.0.0--04z7c0b-develop" />
+    <PackageReference Include="CK.SqlServer.Setup.Model" Version="0.0.0--04z7c09-develop" />
     <ProjectReference Include="..\CK.DB.Zone.WeakActor\CK.DB.Zone.WeakActor.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
   </ItemGroup>
-
 </Project>

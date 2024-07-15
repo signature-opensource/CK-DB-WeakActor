@@ -3,12 +3,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <Description>This package implements Zone.WeakActor.</Description>
   </PropertyGroup>
-  
   <ItemGroup>
     <ProjectReference Include="..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
-    <PackageReference Include="CK.DB.Zone" Version="0.0.0--04yzfbn-develop" />
+    <PackageReference Include="CK.DB.Zone" Version="0.0.0--04z7c0b-develop" />
   </ItemGroup>
-  
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
   </ItemGroup>
