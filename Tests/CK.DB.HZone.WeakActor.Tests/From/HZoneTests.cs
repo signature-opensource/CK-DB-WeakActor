@@ -1,7 +1,6 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
-namespace CK.DB.HZone.WeakActor.Tests
-{
-    [TestFixture]
-    public class HZoneTests : CK.DB.HZone.Tests.HZoneSimpleTests { }
-}
+namespace CK.DB.HZone.WeakActor.Tests;
+
+[TestFixture]
+public class HZoneTests : CK.DB.HZone.Tests.HZoneSimpleTests { }
