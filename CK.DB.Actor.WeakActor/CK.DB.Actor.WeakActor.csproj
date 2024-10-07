@@ -4,8 +4,8 @@
     <Description>This package implements Actor.WeakActor.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.Actor" Version="0.0.0--053ispe-develop" />
-    <PackageReference Include="CK.SqlServer.Setup.Model" Version="0.0.0--053ispd-develop" />
+    <PackageReference Include="CK.DB.Actor" Version="0.0.0--053ith6-develop" />
+    <PackageReference Include="CK.SqlServer.Setup.Model" Version="0.0.0--053itgw-develop" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
