@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CK.SqlServer.Dapper" Version="10.1.1--0015-develop" />
-    <PackageReference Include="CK.DB.HZone.Tests" Version="23.1.1--0019-develop" />
+    <PackageReference Include="CK.DB.HZone.Tests" Version="23.1.1--0020-develop" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <ProjectReference Include="..\..\CK.DB.HZone.WeakActor\CK.DB.HZone.WeakActor.csproj" />
