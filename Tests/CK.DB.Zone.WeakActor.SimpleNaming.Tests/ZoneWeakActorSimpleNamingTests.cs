@@ -2,7 +2,7 @@ using CK.Core;
 using CK.SqlServer;
 using CK.Testing;
 using Dapper;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using static CK.Testing.MonitorTestHelper;
@@ -26,7 +26,7 @@ public class ZoneWeakActorSimpleNamingTests
                 Populate( context );
 
             var weakActors = context[WeakActorTable].Query<string>( sql );
-            weakActors.Should().OnlyHaveUniqueItems();
+            weakActors.ShouldBeUnique();
         }
     }
 

@@ -2,7 +2,7 @@ using CK.Core;
 using CK.SqlServer;
 using CK.Testing;
 using Dapper;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using System;
@@ -34,21 +34,21 @@ public class MoveZoneTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var oldProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            oldProfileResult.Should().Be( 1 );
+            oldProfileResult.ShouldBe( 1 );
 
             var newProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            newProfileResult.Should().BeEmpty();
+            newProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
         }
@@ -66,10 +66,10 @@ public class MoveZoneTests
             var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
             WeakActorTable.Create( context, 1, weakActorName, zoneIdTarget );
 
-            WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
-                          .Should().Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*UK_CK_tWeakActor_WeakActorName_ZoneId*" );
+            Util.Invokable( () => WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*UK_CK_tWeakActor_WeakActorName_ZoneId.*" );
         }
     }
 
@@ -108,11 +108,10 @@ public class MoveZoneTests
 
             var zoneIdTarget = ZoneTable.CreateZone( context, 1 );
 
-            WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget, option: WeakActorZoneMoveOption.None ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.IsInAGroup*" );
+            Util.Invokable( () => WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget, option: WeakActorZoneMoveOption.None ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.IsInAGroup.*" );
         }
     }
 
@@ -138,21 +137,21 @@ public class MoveZoneTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var oldProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            oldProfileResult.Should().Be( 1 );
+            oldProfileResult.ShouldBe( 1 );
 
             var newProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            newProfileResult.Should().BeEmpty();
+            newProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
 
@@ -161,7 +160,7 @@ public class MoveZoneTests
                                        "select * from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId",
                                        new { weakActorId, groupId }
                                    )
-                                   .Should().BeEmpty();
+                                   .ShouldBeEmpty();
         }
     }
 }

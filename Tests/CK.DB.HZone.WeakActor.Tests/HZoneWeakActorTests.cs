@@ -3,7 +3,7 @@ using CK.DB.Zone;
 using CK.SqlServer;
 using CK.Testing;
 using Dapper;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
 using System;
@@ -64,14 +64,10 @@ public class HZoneWeakActorTests
 
             WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneUnderTest );
 
-            ZoneTable.Invoking
-                     (
-                         sut => sut.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.None )
-                     )
-                     .Should()
-                     .Throw<SqlDetailedException>()
-                     .WithInnerException<SqlException>()
-                     .WithMessage( "*Group.UserNotInZone*" );
+            Util.Invokable( () => ZoneTable.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.None ) )
+                     .ShouldThrow<SqlDetailedException>()
+                     .InnerException.ShouldBeOfType<SqlException>()
+                     .Message.ShouldMatch( @".*Group\.UserNotInZone.*" );
 
             ZoneTable.MoveZone( context, 1, zoneUnderTest, rootZoneOrigin, GroupMoveOption.None );
         }
@@ -109,11 +105,10 @@ public class HZoneWeakActorTests
 
             WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneUnderTest );
 
-            ZoneTable.Invoking( sut => sut.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.Intersect ) )
-                     .Should()
-                     .Throw<SqlDetailedException>()
-                     .WithInnerException<SqlException>()
-                     .WithMessage( "*Zone.CannotRemoveWeakActor*" );
+            Util.Invokable( () => ZoneTable.MoveZone( context, 1, zoneUnderTest, rootZoneTarget, GroupMoveOption.Intersect ) )
+                     .ShouldThrow<SqlDetailedException>()
+                     .InnerException.ShouldBeOfType<SqlException>()
+                     .Message.ShouldMatch( @".*Zone\.CannotRemoveWeakActor.*" );
         }
     }
 
@@ -128,15 +123,14 @@ public class HZoneWeakActorTests
 
             WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneUnderTest );
 
-            ZoneTable.Invoking( sut => sut.MoveZone( context,
+            Util.Invokable( () => ZoneTable.MoveZone( context,
                                                      1,
                                                      zoneUnderTest,
                                                      rootZoneTarget,
                                                      GroupMoveOption.AutoUserRegistration ) )
-                     .Should()
-                     .Throw<SqlDetailedException>()
-                     .WithInnerException<SqlException>()
-                     .WithMessage( "*Group.WeakActorCannotUseAutoUserRegistration*" );
+                     .ShouldThrow<SqlDetailedException>()
+                     .InnerException.ShouldBeOfType<SqlException>()
+                     .Message.ShouldMatch( @".*Group\.WeakActorCannotUseAutoUserRegistration.*" );
         }
     }
 
@@ -151,19 +145,19 @@ public class HZoneWeakActorTests
             var otherChildZone = ZoneTable.CreateZone( context, 1, rootZone );
             var childChildZone = ZoneTable.CreateZone( context, 1, childZone );
 
-            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).Should().BeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).Should().BeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).Should().BeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).Should().BeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).Should().BeFalse();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).ShouldBeFalse();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).ShouldBeFalse();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).ShouldBeFalse();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).ShouldBeFalse();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).ShouldBeFalse();
 
             WeakActorTable.Create( context, 1, weakActorName, childZone );
 
-            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).Should().BeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).Should().BeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).Should().BeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).Should().BeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).Should().BeTrue();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).ShouldBeTrue();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).ShouldBeTrue();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).ShouldBeTrue();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).ShouldBeTrue();
+            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).ShouldBeTrue();
         }
     }
 
@@ -195,46 +189,38 @@ public class HZoneWeakActorTests
             WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), childZone22 );
 
             // Why the inner message is not the same as the test i've written in CK.DB.Actor ?
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, rootZone ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone10 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone11 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone12 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone20 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone21 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, childZone22 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, rootZone ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone10 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone11 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone12 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone20 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone21 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, childZone22 ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
         }
     }
 
@@ -258,21 +244,21 @@ public class HZoneWeakActorTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var oldProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            oldProfileResult.Should().Be( 1 );
+            oldProfileResult.ShouldBe( 1 );
 
             var newProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            newProfileResult.Should().BeEmpty();
+            newProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
         }
@@ -297,21 +283,21 @@ public class HZoneWeakActorTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var newProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            newProfileResult.Should().Be( 1 );
+            newProfileResult.ShouldBe( 1 );
 
             var oldProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            oldProfileResult.Should().BeEmpty();
+            oldProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
         }
@@ -332,10 +318,10 @@ public class HZoneWeakActorTests
 
             var zoneIdTarget = ZoneTable.CreateZone( context, 1, targetBaseZoneId );
 
-            WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
-                          .Should().Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.WeakActorNameShouldBeUniqueInHZone*" );
+            Util.Invokable( () => WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
         }
     }
 
@@ -377,10 +363,10 @@ public class HZoneWeakActorTests
             var baseZoneIdTarget = ZoneTable.CreateZone( context, 1 );
             var zoneIdTarget = ZoneTable.CreateZone( context, 1, baseZoneIdTarget );
 
-            WeakActorTable.Invoking( sut => sut.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
-                          .Should().Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.IsInAGroup*" );
+            Util.Invokable( () => WeakActorTable.MoveZone( context, 1, weakActorId, zoneIdTarget ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.IsInAGroup.*" );
         }
     }
 
@@ -405,21 +391,21 @@ public class HZoneWeakActorTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var newProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            newProfileResult.Should().Be( 1 );
+            newProfileResult.ShouldBe( 1 );
 
             var oldProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            oldProfileResult.Should().BeEmpty();
+            oldProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
         }
@@ -447,26 +433,26 @@ public class HZoneWeakActorTests
                 "select ZoneId from CK.vWeakActor where WeakActorId=@weakActorId",
                 new { weakActorId }
             );
-            zoneIdResult.Should().Be( zoneIdTarget );
+            zoneIdResult.ShouldBe( zoneIdTarget );
 
             var oldProfileResult = context[WeakActorTable].QuerySingle<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneIdTarget",
                 new { weakActorId, zoneIdTarget }
             );
-            oldProfileResult.Should().Be( 1 );
+            oldProfileResult.ShouldBe( 1 );
 
             var newProfileResult = context[WeakActorTable].Query<int>
             (
                 "select 1 from CK.tActorProfile where ActorId=@weakActorId and GroupId=@zoneId",
                 new { weakActorId, zoneId }
             );
-            newProfileResult.Should().BeEmpty();
+            newProfileResult.ShouldBeEmpty();
 
             WeakActorTable.MoveZone( context, 1, weakActorId, zoneId );
 
             context[WeakActorTable].Query( "select * from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId", new { weakActorId, groupId } )
-                                   .Should().BeEmpty();
+                                   .ShouldBeEmpty();
         }
     }
 
