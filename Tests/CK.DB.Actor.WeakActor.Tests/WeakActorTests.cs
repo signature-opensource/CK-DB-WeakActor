@@ -1,6 +1,6 @@
 using CK.Core;
 using CK.SqlServer;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using System.Diagnostics;
@@ -20,9 +20,8 @@ public class WeakActorTests
     {
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
-            await Table.Invoking( sut => sut.CreateAsync( context, 0, Guid.NewGuid().ToString() ) )
-                       .Should()
-                       .ThrowAsync<SqlDetailedException>();
+            await Util.Invokable( () => Table.CreateAsync( context, 0, Guid.NewGuid().ToString() ) )
+                       .ShouldThrowAsync<SqlDetailedException>();
         }
     }
 
@@ -32,7 +31,7 @@ public class WeakActorTests
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
-            weakActorId.Should().BeGreaterThan( 0 );
+            weakActorId.ShouldBeGreaterThan( 0 );
         }
     }
 
@@ -61,16 +60,14 @@ public class WeakActorTests
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
 
             var userActorId = await userTable.CreateUserAsync( context, 1, Guid.NewGuid().ToString() );
-            await Table.Invoking( sut => sut.AddIntoGroupAsync( context, 1, groupId, userActorId ) )
-                       .Should()
-                       .ThrowAsync<SqlDetailedException>();
+            await Util.Invokable( () => Table.AddIntoGroupAsync( context, 1, groupId, userActorId ) )
+                       .ShouldThrowAsync<SqlDetailedException>();
 
             await Table.AddIntoGroupAsync( context, 1, groupId, weakActorId );
 
             var sql = "select count(*) from CK.tActorProfile where GroupId = @groupId and ActorId = @weakActorId";
             context[Table].QuerySingle<int>( sql, new { groupId, weakActorId } )
-                          .Should()
-                          .Be( 1 );
+                          .ShouldBe( 1 );
         }
     }
 
@@ -81,9 +78,8 @@ public class WeakActorTests
         {
             var name = Guid.NewGuid().ToString();
             Table.Create( context, 1, name );
-            Table.Invoking( sut => sut.Create( context, 1, name ) )
-                 .Should()
-                 .Throw<SqlDetailedException>();
+            Util.Invokable( () => Table.Create( context, 1, name ) )
+                 .ShouldThrow<SqlDetailedException>();
         }
     }
 }

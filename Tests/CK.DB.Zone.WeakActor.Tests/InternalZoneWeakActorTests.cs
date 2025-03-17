@@ -1,7 +1,7 @@
 using CK.Core;
 using CK.SqlServer;
 using CK.Testing;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using static CK.Testing.MonitorTestHelper;
@@ -24,9 +24,8 @@ public sealed class InternalZoneWeakActorTests
             var groupId = GroupTable.CreateGroup( context, 1, groupZoneId );
             var weakActorId = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), weakActorZoneId );
 
-            WeakActorTable.Invoking( sut => sut.AddIntoGroup( context, 1, groupId, weakActorId ) )
-                          .Should()
-                          .Throw<SqlDetailedException>();
+            Util.Invokable( () => WeakActorTable.AddIntoGroup( context, 1, groupId, weakActorId ) )
+                          .ShouldThrow<SqlDetailedException>();
         }
     }
 }

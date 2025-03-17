@@ -1,6 +1,6 @@
 using CK.Core;
 using CK.SqlServer;
-using FluentAssertions;
+using Shouldly;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -28,9 +28,8 @@ public class ZoneWeakActorTests
 
             var name = Guid.NewGuid().ToString();
             WeakActorTable.Create( context, 1, name, zoneId1 );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, name, zoneId2 ) )
-                          .Should()
-                          .NotThrow<SqlDetailedException>();
+            Util.Invokable( () => WeakActorTable.Create( context, 1, name, zoneId2 ) )
+                          .ShouldNotThrow( /*Was Should().NotThrow<SqlDetailedException>. */);
         }
     }
 
@@ -44,9 +43,8 @@ public class ZoneWeakActorTests
             var zoneId2 = ZoneTable.CreateZone( context, 1 );
             WeakActorTable.Create( context, 1, name, zoneId1 );
             WeakActorTable.Create( context, 1, name, zoneId2 );
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, name, zoneId1 ) )
-                          .Should()
-                          .Throw<SqlDetailedException>();
+            Util.Invokable( () => WeakActorTable.Create( context, 1, name, zoneId1 ) )
+                          .ShouldThrow<SqlDetailedException>();
         }
     }
 
@@ -89,9 +87,8 @@ public class ZoneWeakActorTests
             var weakActorName = Guid.NewGuid().ToString();
             WeakActorTable.Create( context, 1, weakActorName, zoneId );
 
-            WeakActorTable.Invoking( sut => sut.Create( context, 1, weakActorName, zoneId ) )
-                          .Should()
-                          .Throw<SqlDetailedException>();
+            Util.Invokable( () => WeakActorTable.Create( context, 1, weakActorName, zoneId ) )
+                          .ShouldThrow<SqlDetailedException>();
         }
     }
 
@@ -103,7 +100,7 @@ public class ZoneWeakActorTests
             var zoneId = ZoneTable.CreateZone( context, 1 );
             var weakActor1 = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneId );
             var weakActor2 = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zoneId );
-            weakActor1.Should().NotBe( weakActor2 );
+            weakActor1.ShouldNotBe( weakActor2 );
         }
     }
 
@@ -127,7 +124,7 @@ public class ZoneWeakActorTests
             WeakActorTable.AddIntoGroup( context, 1, group, weakActorId );
 
             var weakActors = context[WeakActorTable].Query<string>( sql );
-            weakActors.Should().OnlyHaveUniqueItems();
+            weakActors.ShouldBeUnique();
         }
     }
 
@@ -149,11 +146,10 @@ public class ZoneWeakActorTests
 
             WeakActorTable.AddIntoGroup( context, 1, group, weakActorId1 );
 
-            GroupTable.Invoking( sut => sut.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.None ) )
-                      .Should()
-                      .Throw<SqlDetailedException>()
-                      .WithInnerException<SqlException>()
-                      .WithMessage( "*Group.UserNotInZone*" );
+            Util.Invokable( () => GroupTable.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.None ) )
+                      .ShouldThrow<SqlDetailedException>()
+                      .InnerException.ShouldBeOfType<SqlException>()
+                      .Message.ShouldMatch( @".*Group\.UserNotInZone.*" );
         }
     }
 
@@ -176,19 +172,17 @@ public class ZoneWeakActorTests
             var checkGroupParams = new { groupId, weakActorId };
 
             var checkGroupBefore = context[WeakActorTable].QuerySingle<int>( sqlCheckGroup, checkGroupParams );
-            checkGroupBefore.Should().Be( 0 );
+            checkGroupBefore.ShouldBe( 0 );
 
             WeakActorTable.AddIntoGroup( context, 1, groupId, weakActorId );
             var checkGroup = context[WeakActorTable].QuerySingle<int>( sqlCheckGroup, checkGroupParams );
-            checkGroup.Should().Be( 1 );
+            checkGroup.ShouldBe( 1 );
 
-            GroupTable.Invoking( sut => sut.MoveGroup( context, 1, groupId, zoneId2, GroupMoveOption.Intersect ) )
-                      .Should()
-                      .NotThrow<SqlDetailedException>();
+            Util.Invokable( () => GroupTable.MoveGroup( context, 1, groupId, zoneId2, GroupMoveOption.Intersect ) )
+                      .ShouldNotThrow();
 
             var checkGroupAfter = context[WeakActorTable].QuerySingle<int>( sqlCheckGroup, checkGroupParams );
-            checkGroupAfter.Should().Be( checkGroupBefore )
-                           .And.Be( 0 );
+            checkGroupAfter.ShouldBe( checkGroupBefore );
 
             context[WeakActorTable].QuerySingle<int>( """
                                        select count(*)
@@ -202,7 +196,7 @@ public class ZoneWeakActorTests
                                            and ZoneId=@ZoneId;
                                        """,
                                        new { ZoneId = zoneId2, WeakActorId = weakActorId } )
-                                   .Should().Be( 0 );
+                                   .ShouldBe( 0 );
 
             context[WeakActorTable].QuerySingle<int>( """
                                        select count(*)
@@ -216,7 +210,7 @@ public class ZoneWeakActorTests
                                            and ZoneId=@ZoneId;
                                        """,
                                        new { ZoneId = zoneId1, WeakActorId = weakActorId } )
-                                   .Should().Be( 1 );
+                                   .ShouldBe( 1 );
         }
     }
 
@@ -238,9 +232,8 @@ public class ZoneWeakActorTests
 
             WeakActorTable.AddIntoGroup( context, 1, group, weakActorId1 );
 
-            GroupTable.Invoking( sut => sut.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.AutoUserRegistration ) )
-                      .Should()
-                      .Throw<SqlDetailedException>();
+            Util.Invokable( () => GroupTable.MoveGroup( context, 1, group, zoneId2, GroupMoveOption.AutoUserRegistration ) )
+                      .ShouldThrow<SqlDetailedException>();
         }
     }
 
@@ -260,12 +253,12 @@ public class ZoneWeakActorTests
                 "select GroupId from CK.tActorProfile where ActorId=@WeakActorId and GroupId!=@WeakActorId;",
                 new { WeakActorId = weakActorId }
             );
-            currentGroupId.Should().Be( zoneId1 );
+            currentGroupId.ShouldBe( zoneId1 );
 
-            GroupTable.Invoking( sut => sut.MoveGroup( context, 1, zoneId1, zoneId2, GroupMoveOption.Intersect ) )
-                      .Should().Throw<SqlDetailedException>()
-                      .WithInnerException<SqlException>()
-                      .WithMessage( "*Zone.CannotRemoveWeakActor*" );
+            Util.Invokable( () => GroupTable.MoveGroup( context, 1, zoneId1, zoneId2, GroupMoveOption.Intersect ) )
+                      .ShouldThrow<SqlDetailedException>()
+                      .InnerException.ShouldBeOfType<SqlException>()
+                      .Message.ShouldMatch( @".*Zone\.CannotRemoveWeakActor.*" );
 
             var noGroupId = context[WeakActorTable].QuerySingle<int>
             (
@@ -273,7 +266,7 @@ public class ZoneWeakActorTests
                 new { WeakActorId = weakActorId }
             );
 
-            noGroupId.Should().Be( currentGroupId );
+            noGroupId.ShouldBe( currentGroupId );
         }
     }
 
@@ -292,10 +285,10 @@ public class ZoneWeakActorTests
                                        "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                        new { weakActorId, GroupId = zoneId }
                                    )
-                                   .Should().Be( 1 );
+                                   .ShouldBe( 1 );
 
-            ZoneTable.Invoking( sut => sut.RemoveUser( context, 1, zoneId, weakActorId ) )
-                     .Should().Throw<SqlDetailedException>();
+            Util.Invokable( () => ZoneTable.RemoveUser( context, 1, zoneId, weakActorId ) )
+                     .ShouldThrow<SqlDetailedException>();
         }
     }
 
@@ -317,7 +310,7 @@ public class ZoneWeakActorTests
                                        "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId;",
                                        new { weakActorId, groupId }
                                    )
-                                   .Should().Be( 1 );
+                                   .ShouldBe( 1 );
 
             GroupTable.RemoveUser( context, 1, groupId, weakActorId );
 
@@ -326,7 +319,7 @@ public class ZoneWeakActorTests
                                        "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@groupId;",
                                        new { weakActorId, groupId }
                                    )
-                                   .Should().Be( 0 );
+                                   .ShouldBe( 0 );
         }
     }
 
@@ -345,18 +338,18 @@ public class ZoneWeakActorTests
                                        "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                        new { weakActorId, GroupId = zoneId }
                                    )
-                                   .Should().Be( 1 );
+                                   .ShouldBe( 1 );
 
-            GroupTable.Invoking( sut => sut.RemoveUser( context, 1, zoneId, weakActorId ) )
-                      .Should().Throw<SqlDetailedException>()
-                      .WithInnerException<SqlException>();
+            Util.Invokable( () => GroupTable.RemoveUser( context, 1, zoneId, weakActorId ) )
+                      .ShouldThrow<SqlDetailedException>()
+                      .InnerException.ShouldBeOfType<SqlException>();
 
             context[WeakActorTable].QuerySingle<int>
                                    (
                                        "select count(*) from CK.tActorProfile where ActorId=@weakActorId and GroupId=@GroupId;",
                                        new { weakActorId, GroupId = zoneId }
                                    )
-                                   .Should().Be( 1 );
+                                   .ShouldBe( 1 );
         }
     }
 
@@ -374,10 +367,10 @@ public class ZoneWeakActorTests
             var weakActorName = Guid.NewGuid().ToString();
             var weakActorId = WeakActorTable.Create( context, 1, weakActorName, zoneId );
 
-            WeakActorTable.Invoking( sut => sut.AddIntoGroup( context, 1, groupZoneId, weakActorId ) )
-                          .Should().Throw<SqlDetailedException>()
-                          .WithInnerException<SqlException>()
-                          .WithMessage( "*WeakActor.AddToZoneForbidden*" );
+            Util.Invokable( () => WeakActorTable.AddIntoGroup( context, 1, groupZoneId, weakActorId ) )
+                          .ShouldThrow<SqlDetailedException>()
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.AddToZoneForbidden.*" );
         }
     }
 }
