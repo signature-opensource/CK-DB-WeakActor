@@ -8,7 +8,7 @@ namespace CK.DB.Actor.WeakActor;
 /// Holds the persisted <see cref="Actor.WeakActor"/>.
 /// </summary>
 [SqlTable( "tWeakActor", Package = typeof( Package ) )]
-[Versions( "1.0.0" )]
+[Versions( "1.0.0, 1.1.0" )]
 [SqlObjectItem( "vWeakActor" )]
 public abstract partial class WeakActorTable : SqlTable
 {
@@ -41,4 +41,31 @@ public abstract partial class WeakActorTable : SqlTable
     /// <returns>An awaitable.</returns>
     [SqlProcedure( "sGroupWeakActorAdd" )]
     public abstract Task AddIntoGroupAsync( ISqlCallContext c, int actorId, int groupId, int weakActorId );
+
+    /// <summary>
+    /// Archives a WeakActor by its identifier (does nothing if The WeakActor does not exist).
+    /// </summary>
+    /// <param name="c">The sql call context to use.</param>
+    /// <param name="actorId">The current actor identifier.</param>
+    /// <param name="weakActorId">The WeakActor identifier to archive.</param>
+    [SqlProcedure( "sWeakActorArchive" )]
+    public abstract Task ArchiveAsync( ISqlCallContext c, int actorId, int weakActorId );
+
+    /// <summary>
+    /// Restores a WeakActor by its identifier (does nothing if The WeakActor does not exist).
+    /// </summary>
+    /// <param name="c">The sql call context to use.</param>
+    /// <param name="actorId">The current actor identifier.</param>
+    /// <param name="weakActorId">The WeakActor identifier to restore.</param>
+    [SqlProcedure( "sWeakActorRestore" )]
+    public abstract Task RestoreAsync( ISqlCallContext c, int actorId, int weakActorId );
+
+    /// <summary>
+    /// Creates a WeakActor.
+    /// </summary>
+    /// <param name="c">The sql call context to use.</param>
+    /// <param name="actorId">The current actor identifier.</param>
+    /// <param name="weakActorName">The WeakActor new name.</param>
+    [SqlProcedure( "sWeakActorRename" )]
+    public abstract Task RenameAsync( ISqlCallContext c, int actorId, int weakActorId, string weakActorName );
 }
