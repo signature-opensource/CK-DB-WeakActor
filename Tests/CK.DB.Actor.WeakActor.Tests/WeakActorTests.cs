@@ -82,4 +82,69 @@ public class WeakActorTests
                  .ShouldThrow<SqlDetailedException>();
         }
     }
+
+    [Test]
+    public async Task can_archive_weak_actor_Async()
+    {
+        var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>();
+        Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
+        var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
+        Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
+
+        using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
+        {
+            var groupId = await groupTable.CreateGroupAsync( context, 1 );
+            var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
+            await Table.ArchiveAsync( context, 1, weakActorId );
+            var sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
+                          .ShouldNotBe( DateTime.MinValue );
+        }
+    }
+
+    [Test]
+    public async Task can_restore_weak_actor_Async()
+    {
+        var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>();
+        Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
+        var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
+        Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
+
+        using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
+        {
+            var groupId = await groupTable.CreateGroupAsync( context, 1 );
+            var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
+            await Table.ArchiveAsync( context, 1, weakActorId );
+            var sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
+                          .ShouldNotBe( DateTime.MinValue );
+            await Table.RestoreAsync( context, 1, weakActorId );
+            sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
+                          .ShouldBe( DateTime.MinValue );
+        }
+    }
+
+    [Test]
+    public async Task can_rename_weak_actor_Async()
+    {
+        var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>();
+        Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
+        var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
+        Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
+
+        using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
+        {
+            var groupId = await groupTable.CreateGroupAsync( context, 1 );
+            var name = Guid.NewGuid().ToString();
+            var weakActorId = await Table.CreateAsync( context, 1, name );
+
+            var newName = Guid.NewGuid().ToString();
+            await Table.RenameAsync( context, 1, weakActorId, newName );
+            var sql = "select WeakActorName from CK.tWeakActor where WeakActorId = @weakActorId";
+            context[Table].QuerySingle<string>( sql, new { groupId, weakActorId } )
+                          .ShouldNotBe( name )
+                          .ShouldBe( newName );
+        }
+    }
 }
