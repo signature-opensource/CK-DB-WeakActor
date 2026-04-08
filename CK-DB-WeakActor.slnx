@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="appveyor.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="NuGet.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/CK.DB.Actor.WeakActor.Tests/CK.DB.Actor.WeakActor.Tests.csproj" />
+    <Project Path="Tests/CK.DB.HZone.WeakActor.SimpleNaming.Tests/CK.DB.HZone.WeakActor.SimpleNaming.Tests.csproj" />
+    <Project Path="Tests/CK.DB.HZone.WeakActor.Tests/CK.DB.HZone.WeakActor.Tests.csproj" />
+    <Project Path="Tests/CK.DB.Zone.WeakActor.SimpleNaming.Tests/CK.DB.Zone.WeakActor.SimpleNaming.Tests.csproj" />
+    <Project Path="Tests/CK.DB.Zone.WeakActor.Tests/CK.DB.Zone.WeakActor.Tests.csproj" />
+  </Folder>
+  <Project Path="CK.DB.Actor.WeakActor/CK.DB.Actor.WeakActor.csproj" />
+  <Project Path="CK.DB.HZone.WeakActor/CK.DB.HZone.WeakActor.csproj" />
+  <Project Path="CK.DB.Zone.WeakActor.SimpleNaming/CK.DB.Zone.WeakActor.SimpleNaming.csproj" />
+  <Project Path="CK.DB.Zone.WeakActor/CK.DB.Zone.WeakActor.csproj" />
+</Solution>
