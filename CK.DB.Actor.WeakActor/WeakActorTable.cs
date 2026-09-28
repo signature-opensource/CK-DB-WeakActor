@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 namespace CK.DB.Actor.WeakActor;
 
 /// <summary>
-/// Holds the persisted <see cref="Actor.WeakActor"/>.
+/// Holds the persisted weak actor.
 /// </summary>
 [SqlTable( "tWeakActor", Package = typeof( Package ) )]
-[Versions( "1.0.0, 1.1.0" )]
+[Versions( "1.0.0, 1.1.0, 1.2.0" )]
 [SqlObjectItem( "vWeakActor" )]
 public abstract partial class WeakActorTable : SqlTable
 {
@@ -49,7 +49,7 @@ public abstract partial class WeakActorTable : SqlTable
     public abstract Task RestoreAsync( ISqlCallContext c, int actorId, int weakActorId );
 
     /// <summary>
-    /// Creates a WeakActor.
+    /// Renames a WeakActor.
     /// </summary>
     /// <param name="c">The sql call context to use.</param>
     /// <param name="actorId">The current actor identifier.</param>

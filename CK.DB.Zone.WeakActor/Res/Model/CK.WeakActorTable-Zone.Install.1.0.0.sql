@@ -8,5 +8,7 @@ alter table CK.tWeakActor
 
 alter table CK.tWeakActor drop constraint UK_CK_tWeakActor_WeakActorName;
 
+-- No index on ZoneId. If a lot of WeakActor exists, an index (ZoneId that includes WeakActorName
+-- for instance) may be created.
 alter table CK.tWeakActor
     add constraint UK_CK_tWeakActor_WeakActorName_ZoneId unique( WeakActorName, ZoneId )

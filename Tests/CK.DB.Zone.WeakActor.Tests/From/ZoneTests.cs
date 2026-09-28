@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace CK.DB.Zone.WeakActor.Tests;
+namespace CK.DB.Zone.WeakActor.Tests.From;
 
 [TestFixture]
 public class ZoneTests : CK.DB.Zone.Tests.ZoneTests { }

@@ -19,8 +19,8 @@ begin
         --<PreUpdate />
 
         update CK.tWeakActor
-        set WeakActorName = @WeakActorName
-        where WeakActorId = @WeakActorId;
+            set WeakActorName = @WeakActorName
+            where WeakActorId = @WeakActorId;
 
         --<PostUpdate />
     end

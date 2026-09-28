@@ -16,8 +16,8 @@ create table CK.tWeakActor
     CreationDate datetime2 (2) not null
         constraint DF_CK_tWeakActor_CreationDate default ( sysutcdatetime() ),
 
-    BinDate      datetime2 (2) not null
-        constraint DF_CK_tWeakActor_BinDate default ( '0001-01-01' )
+    ArchiveDate datetime2 (2) not null
+        constraint DF_CK_tWeakActor_ArchiveDate default ( '0001-01-01' )
 );
 
 insert into CK.tWeakActor( WeakActorId, WeakActorName ) values ( 0, N'' );

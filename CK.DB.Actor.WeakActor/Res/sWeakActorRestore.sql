@@ -15,8 +15,8 @@ begin
         --<PreUpdate />
 
         update CK.tWeakActor
-        set BinDate = '0001-01-01'
-        where WeakActorId = @WeakActorId;
+            set ArchiveDate = '0001-01-01'
+            where WeakActorId = @WeakActorId;
 
         --<PostUpdate />
     end

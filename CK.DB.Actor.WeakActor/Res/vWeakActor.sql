@@ -4,5 +4,5 @@ as
            w.WeakActorName,
            w.CreationDate,
            DisplayName = w.WeakActorName,
-           w.BinDate
+           w.ArchiveDate
     from CK.tWeakActor w;

@@ -1,0 +1,16 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupMemberAdd
+as
+begin
+
+    inject "
+                -- If the @MemberId is a WeakActor it MUST be in the Zone.
+                if exists( select 1 from CK.tWeakActor w where w.WeakActorId = @MemberId )
+                begin
+					;throw 50000, 'Group.WeakActorNotInZone', 1;
+                end
+
+                "
+    before single {if @AutoAddMemberInZone = 1};
+
+end

@@ -13,7 +13,7 @@ namespace CK.DB.Actor.WeakActor.Tests;
 
 public class WeakActorTests
 {
-    WeakActorTable Table => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
+    WeakActorTable Table => SharedEngine.Map.StObjs.Obtain<WeakActorTable>().ShouldNotBeNull();
 
     [Test]
     public async Task anonymous_cannot_create_weak_actors_Async()
@@ -49,21 +49,15 @@ public class WeakActorTests
     [Test]
     public async Task can_add_a_weak_actor_into_a_group_Async()
     {
-        var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>();
-        Debug.Assert( groupTable != null, nameof( groupTable ) + " != null" );
-        var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>();
-        Debug.Assert( userTable != null, nameof( userTable ) + " != null" );
+        var groupTable = SharedEngine.Map.StObjs.Obtain<GroupTable>().ShouldNotBeNull();
+        var userTable = SharedEngine.Map.StObjs.Obtain<UserTable>().ShouldNotBeNull();
 
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
             var groupId = await groupTable.CreateGroupAsync( context, 1 );
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
 
-            var userActorId = await userTable.CreateUserAsync( context, 1, Guid.NewGuid().ToString() );
-            await Util.Invokable( () => Table.AddIntoGroupAsync( context, 1, groupId, userActorId ) )
-                       .ShouldThrowAsync<SqlDetailedException>();
-
-            await Table.AddIntoGroupAsync( context, 1, groupId, weakActorId );
+            await groupTable.AddMemberAsync( context, 1, groupId, weakActorId );
 
             var sql = "select count(*) from CK.tActorProfile where GroupId = @groupId and ActorId = @weakActorId";
             context[Table].QuerySingle<int>( sql, new { groupId, weakActorId } )
@@ -72,14 +66,13 @@ public class WeakActorTests
     }
 
     [Test]
-    public void create_twice_the_same_weak_actor_name_should_throw()
+    public async Task create_twice_the_same_weak_actor_name_should_throw_Async()
     {
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
             var name = Guid.NewGuid().ToString();
-            Table.Create( context, 1, name );
-            Util.Invokable( () => Table.Create( context, 1, name ) )
-                 .ShouldThrow<SqlDetailedException>();
+            await Table.CreateAsync( context, 1, name );
+            await Should.ThrowAsync<SqlDetailedException>( () => Table.CreateAsync( context, 1, name ) );
         }
     }
 
@@ -96,7 +89,7 @@ public class WeakActorTests
             var groupId = await groupTable.CreateGroupAsync( context, 1 );
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
             await Table.ArchiveAsync( context, 1, weakActorId );
-            var sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            var sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldNotBe( DateTime.MinValue );
         }
@@ -115,11 +108,11 @@ public class WeakActorTests
             var groupId = await groupTable.CreateGroupAsync( context, 1 );
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
             await Table.ArchiveAsync( context, 1, weakActorId );
-            var sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            var sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldNotBe( DateTime.MinValue );
             await Table.RestoreAsync( context, 1, weakActorId );
-            sql = "select BinDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldBe( DateTime.MinValue );
         }

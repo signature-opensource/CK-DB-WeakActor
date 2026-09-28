@@ -10,6 +10,4 @@ namespace CK.DB.Actor.WeakActor;
 public abstract class Package : SqlPackage
 {
     void StObjConstruct( Actor.Package actorPackage ) { }
-
-    [InjectObject] public WeakActorTable WeakActorTable { get; protected set; }
 }
