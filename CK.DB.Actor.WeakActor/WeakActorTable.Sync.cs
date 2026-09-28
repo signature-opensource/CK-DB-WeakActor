@@ -23,15 +23,4 @@ public abstract partial class WeakActorTable
     [SqlProcedure( "sWeakActorDestroy" )]
     public abstract void Destroy( ISqlCallContext c, int actorId, int weakActorId );
 
-    /// <summary>
-    /// Adds a WeakActor into a Group.
-    /// Throws if input WeakActorId is not a WeakActor.
-    /// </summary>
-    /// <param name="c">The sql call context to use.</param>
-    /// <param name="actorId">The current actor identifier.</param>
-    /// <param name="groupId">The group identifier.</param>
-    /// <param name="weakActorId">The WeakActor identifier to add.</param>
-    /// <returns>An awaitable.</returns>
-    [SqlProcedure( "sGroupWeakActorAdd" )]
-    public abstract void AddIntoGroup( ISqlCallContext c, int actorId, int groupId, int weakActorId );
 }

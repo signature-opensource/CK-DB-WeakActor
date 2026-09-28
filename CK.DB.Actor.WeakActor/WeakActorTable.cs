@@ -31,18 +31,6 @@ public abstract partial class WeakActorTable : SqlTable
     public abstract Task DestroyAsync( ISqlCallContext c, int actorId, int weakActorId );
 
     /// <summary>
-    /// Adds a WeakActor into a Group.
-    /// Throws if input WeakActorId is not a WeakActor.
-    /// </summary>
-    /// <param name="c">The sql call context to use.</param>
-    /// <param name="actorId">The current actor identifier.</param>
-    /// <param name="groupId">The group identifier.</param>
-    /// <param name="weakActorId">The WeakActor identifier to add.</param>
-    /// <returns>An awaitable.</returns>
-    [SqlProcedure( "sGroupWeakActorAdd" )]
-    public abstract Task AddIntoGroupAsync( ISqlCallContext c, int actorId, int groupId, int weakActorId );
-
-    /// <summary>
     /// Archives a WeakActor by its identifier (does nothing if The WeakActor does not exist).
     /// </summary>
     /// <param name="c">The sql call context to use.</param>
