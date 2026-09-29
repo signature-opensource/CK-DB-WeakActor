@@ -8,7 +8,6 @@ using Shouldly;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static CK.DB.Zone.WeakActor.WeakActorZoneMoveOption;
 using static CK.Testing.MonitorTestHelper;
 
 namespace CK.DB.Zone.WeakActor.Tests;
