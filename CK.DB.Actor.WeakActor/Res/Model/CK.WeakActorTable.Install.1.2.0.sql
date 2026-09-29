@@ -6,10 +6,9 @@ create table CK.tWeakActor
 	    constraint PK_CK_tWeakActor primary key nonclustered ( WeakActorId )
         constraint FK_CK_tWeakActor_WeakActorId foreign key references CK.tActor( ActorId ),
 
-    -- Collation should be case insensitive (recommended practice for user-like names).
+    -- Collation should be case insensitive (recommended practice for user-like names) and tUser.UserName is in Latin1_General_100_CI_AS.
     -- 255 seems large but this is to support emails as user-like names: emails can be 254 unicode characters long.
-    WeakActorName nvarchar( 255 ) collate Latin1_General_100_CI_AI not null
-        constraint UK_CK_tWeakActor_WeakActorName unique,
+    WeakActorName nvarchar( 255 ) collate Latin1_General_100_CI_AS not null constraint UK_CK_tWeakActor_WeakActorName unique,
 
     -- Overall storage size for datetime2(0) is the same as for datetime2(2): 7 bytes.
     -- Let's keep the better precision for it.

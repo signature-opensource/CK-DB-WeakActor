@@ -4,7 +4,8 @@ as
 begin
 
 inject "
-        if exists(select 1 from CK.tWeakActor w where w.WeakActorId=@MemberId and w.ZoneId=@ZoneId)
+        -- A WeakActor cannot be removed from its defining Zone.
+        if exists(select 1 from CK.tWeakActor w where w.WeakActorId = @MemberId and w.ZoneId = @ZoneId)
         begin
             ;throw 50000,'Zone.CannotRemoveWeakActor',1;
         end

@@ -1,4 +1,4 @@
--- SetupConfig: {}
+-- SetupConfig: { "TransformerRequires": [ "CK.vWeakActor" ] }
 create transformer on CK.vGroupMember
 as
 begin

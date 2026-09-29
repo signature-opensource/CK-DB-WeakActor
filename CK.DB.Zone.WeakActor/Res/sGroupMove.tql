@@ -5,7 +5,7 @@ begin
     -- When a Group is moved to another Zone, any WeakActor (that necessarily belongs to the initial Zone) are automatically
     -- removed (this uses the "Intersect" option).
 
-    replace single {;throw 50000, 'Group.UserNotInZone', 1;}
+    replace single {;throw 50000, 'Group.MemberNotInZone', 1;}
         with "
             -- Edge case: the Group contains ONLY weak actors: the Group is cleared (Intersect is the default for Weak Actors).
             if exists( select p.ActorId from CK.tActorProfile p where p.GroupId = @GroupId and p.ActorId <> p.GroupId
@@ -21,7 +21,7 @@ begin
 		";
 
     inject "
-                       or exists(select 1 from CK.tWeakActor where WeakActorId = @ExtraUserIdInZone) -- WeakActor don't follow the group.
+                       or exists(select 1 from CK.tWeakActor where WeakActorId = @ExtraMemberIdInZone) -- WeakActors don't follow the group.
 					"
     after last out of 2 {if @Option = 1};
 

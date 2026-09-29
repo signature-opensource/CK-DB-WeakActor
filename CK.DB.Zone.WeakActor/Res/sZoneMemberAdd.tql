@@ -3,14 +3,34 @@ create transformer on CK.sZoneMemberAdd
 as
 begin
 
+    /*
+        Note: for a <Insertion> point.
+        We need 
+        - before <Insertion> (injects at the top regardless of the revert).
+        - into <Insertion> (respects the revert)
+        - after <Insertion> (injects at the bottom regardless of the revert).
+        Here we need to enclose the --<PreZoneMemberAdd revert>.
+        The following only works because nobody injected anything in the <PreZoneMemberAdd>.
+        Do we need?
+        - before full <Insertion> (injects before <Insertion>).
+        - after full <Insertion> (injects after <Insertion> or </Insertion>).
+    */
+
+    inject "
+        -- For a WeakActor, @DefiningParentZoneId is not null.
+        declare @DefiningParentZoneId int;
+        select @DefiningParentZoneId = w.ZoneId from CK.tWeakActor w where w.WeakActorId = @MemberId;
+    "
+    before single "--<PreZoneMemberAdd";
+
     inject "
             -- If the @MemberId is a WeakActor it SHOULD already be in the Zone: 
             -- if it's not, let this call fix it (but only for the defining Zone).
-            if exists( select 1 from CK.tWeakActor w where w.WeakActorId = @MemberId and w.ZoneId <> @ZoneId )
+            if @DefiningParentZoneId is not null and @DefiningParentZoneId <> @ZoneId
             begin
 		        ;throw 50000, 'Group.InvalidWeakActorZone', 1;
             end
     "
-    into PreZoneMemberAdd
+    after single "--<PreZoneMemberAdd";
 
 end

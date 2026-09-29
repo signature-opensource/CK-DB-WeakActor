@@ -11,4 +11,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="6.3.0" />
     <ProjectReference Include="..\..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Logs\Text\" />
+  </ItemGroup>
 </Project>

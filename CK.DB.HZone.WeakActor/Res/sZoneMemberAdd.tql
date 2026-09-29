@@ -1,0 +1,32 @@
+-- SetupConfig: {}
+create transformer on CK.sZoneMemberAdd
+as
+begin
+
+    inject
+    "
+                -- When @DefiningParentZoneId is not null it must appear in the @Parents otherwise it is a Group.InvalidWeakActorZone error.
+                -- And if it is found, only @Parents that are below it must be considered (because here @AutoAddMemberInParentZone = 1).
+                declare @DefiningParentDepth int = 0;
+                if @DefiningParentZoneId is not null 
+                begin
+                    select @DefiningParentDepth = p.Depth from @Parents p where p.ZoneId = @DefiningParentZoneId;
+                end
+
+                -- If the @DefiningParentZoneId is not null and @DefiningParentDepth is 0, we skip the add in parents:
+                -- this will fail below with the check for WeakActor.
+                if @DefiningParentZoneId is null or @DefiningParentDepth > 0
+                begin
+                    -- We handled the parents: the Zone can accept the WeakActor.
+                    set @DefiningParentZoneId = null;
+    "
+    before single {declare @ParentZoneId int};
+
+    replace single {select ZoneId from @Parents where HasMember = 0 order by Depth}
+        with "select ZoneId from @Parents where HasMember = 0 and (@DefiningParentDepth = 0 or Depth >= @DefiningParentDepth) order by Depth";
+
+    inject "
+                end
+    "
+        after single {deallocate @CParentZone;};
+end

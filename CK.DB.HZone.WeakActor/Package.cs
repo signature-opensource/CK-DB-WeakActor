@@ -7,9 +7,8 @@ namespace CK.DB.HZone.WeakActor;
 /// </summary>
 [SqlPackage( ResourcePath = "Res", ResourceType = typeof( Package ) )]
 [Versions( "1.0.0" )]
-// [SqlObjectItem("transform:vWeakActor")]
+[SqlObjectItem( "transform:sWeakActorCreate, transform:sGroupMemberAdd, transform:sZoneMemberAdd" )]
 public abstract class Package : Zone.WeakActor.Package
 {
-    // void StObjConstruct( Zone.WeakActor.Package zone, Actor.WeakActor.Package weakActor ) { }
-
+    void StObjConstruct( HZone.Package hZone ) { }
 }

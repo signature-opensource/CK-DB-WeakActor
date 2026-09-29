@@ -5,9 +5,9 @@ using NUnit.Framework;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using static CK.Testing.MonitorTestHelper;
 using Dapper;
 using CK.Testing;
+using static CK.Testing.MonitorTestHelper;
 
 namespace CK.DB.Actor.WeakActor.Tests;
 

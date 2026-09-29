@@ -1,0 +1,19 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupMemberAdd
+as
+begin
+
+    replace single {if exists( select 1 from CK.tWeakActor w where w.WeakActorId = @MemberId )}
+    with
+    "
+                -- With HZone, the WeakActor must be in this Zone or one of its parent.
+                declare @DefiningParentZoneId int;
+                select @DefiningParentZoneId = w.ZoneId from CK.tWeakActor w where w.WeakActorId = @MemberId;
+
+                if @DefiningParentZoneId is not null
+                    and not exists( select 1
+                                    from CK.vZoneAllChildren parent
+                                    where parent.ZoneId = @DefiningParentZoneId and parent.ChildId = @ZoneId )
+    ";
+
+end

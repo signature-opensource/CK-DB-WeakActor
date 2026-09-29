@@ -1,14 +1,16 @@
 using CK.Core;
 using CK.DB.Zone;
+using CK.DB.Zone.WeakActor;
 using CK.SqlServer;
 using CK.Testing;
 using Dapper;
-using Shouldly;
 using Microsoft.Data.SqlClient;
 using NUnit.Framework;
+using Shouldly;
 using System;
-using static CK.Testing.MonitorTestHelper;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static CK.Testing.MonitorTestHelper;
 
 namespace CK.DB.HZone.WeakActor.Tests;
 
@@ -20,44 +22,37 @@ public class HZoneWeakActorTests
     GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>().ShouldNotBeNull();
 
     [Test]
-    public async Task can_add_weak_actor_to_a_group_in_hierarchy_Async()
+    public async Task adding_a_weak_actor_to_a_group_in_hierarchy_Async()
     {
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
-            var rootZone = ZoneTable.CreateZone( context, 1 );
-            var zone = ZoneTable.CreateZone( context, 1, rootZone );
-            var innerZone = ZoneTable.CreateZone( context, 1, zone );
-            var groupInInnerZone = GroupTable.CreateGroup( context, 1, innerZone );
+            var rootZoneId = await ZoneTable.CreateZoneAsync( context, 1 );
+            var zoneId = await ZoneTable.CreateZoneAsync( context, 1, rootZoneId );
+            var innerZoneId = await ZoneTable.CreateZoneAsync( context, 1, zoneId );
+            var groupInInnerZoneId = await GroupTable.CreateGroupAsync( context, 1, innerZoneId );
 
-            var weakActor = WeakActorTable.Create( context, 1, Guid.NewGuid().ToString(), zone );
-            await GroupTable.AddMemberAsync( context, 1, groupInInnerZone, weakActor, autoAddMemberInZone: true );
-        }
-    }
+            var weakActorId = await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), zoneId );
 
-    [Test]
-    public void should_find_a_weak_actor_name_in_hierarchy()
-    {
-        using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
-        {
-            var weakActorName = Guid.NewGuid().ToString();
-            var rootZone = ZoneTable.CreateZone( context, 1 );
-            var childZone = ZoneTable.CreateZone( context, 1, rootZone );
-            var otherChildZone = ZoneTable.CreateZone( context, 1, rootZone );
-            var childChildZone = ZoneTable.CreateZone( context, 1, childZone );
+            context[ZoneTable].QuerySingle<int>( $"select count(*) from CK.tActorProfile where GroupId = {zoneId} and ActorId = {weakActorId}" )
+                          .ShouldBe( 1, "The WeakActor is in its defining Zone." );
 
-            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).ShouldBeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).ShouldBeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).ShouldBeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).ShouldBeFalse();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).ShouldBeFalse();
+            context[ZoneTable].QuerySingle<int>( $"select count(*) from CK.tActorProfile where GroupId = {rootZoneId} and ActorId = {weakActorId}" )
+                          .ShouldBe( 0, "The WeakActor is NOT in the parent Zone!" );
 
-            WeakActorTable.Create( context, 1, weakActorName, childZone );
+            // The autoAddMemberInZone is false: the WeakActor is not in the innerZoneId Zone, this fails.
+            await Should.ThrowAsync<SqlDetailedException>( () => GroupTable.AddMemberAsync( context, 1, groupInInnerZoneId, weakActorId, autoAddMemberInZone: false ) );
 
-            WeakActorTable.IsWeakActorNameInHierarchy( context, 0, weakActorName ).ShouldBeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, rootZone, weakActorName ).ShouldBeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childZone, weakActorName ).ShouldBeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, otherChildZone, weakActorName ).ShouldBeTrue();
-            WeakActorTable.IsWeakActorNameInHierarchy( context, childChildZone, weakActorName ).ShouldBeTrue();
+            // Add it to the Group in the the innerZoneId Zone.
+            await GroupTable.AddMemberAsync( context, 1, groupInInnerZoneId, weakActorId, autoAddMemberInZone: true );
+
+            context[ZoneTable].QuerySingle<int>( $"select count(*) from CK.tActorProfile where GroupId = {groupInInnerZoneId} and ActorId = {weakActorId}" )
+                          .ShouldBe( 1, "The WeakActor is in the target Group." );
+
+            context[ZoneTable].QuerySingle<int>( $"select count(*) from CK.tActorProfile where GroupId = {innerZoneId} and ActorId = {weakActorId}" )
+                          .ShouldBe( 1, "And has been added to the innerZoneId Zone." );
+
+            context[ZoneTable].QuerySingle<int>( $"select count(*) from CK.tActorProfile where GroupId = {rootZoneId} and ActorId = {weakActorId}" )
+                          .ShouldBe( 0, "But he is NOT in the parent Zone!" );
         }
     }
 
@@ -66,53 +61,112 @@ public class HZoneWeakActorTests
     {
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
-            var weakActorName = Guid.NewGuid().ToString();
-            var rootZone = ZoneTable.CreateZone( context, 1 );
+            var rootZone = await ZoneTable.CreateZoneAsync( context, 1 );
 
-            var childZone10 = ZoneTable.CreateZone( context, 1, rootZone );
-            var childZone11 = ZoneTable.CreateZone( context, 1, childZone10 );
-            var childZone12 = ZoneTable.CreateZone( context, 1, childZone10 );
+            var childZoneA = await ZoneTable.CreateZoneAsync( context, 1, rootZone );
+            var childZoneA1 = await ZoneTable.CreateZoneAsync( context, 1, childZoneA );
+            var childZoneA2 = await ZoneTable.CreateZoneAsync( context, 1, childZoneA );
 
-            var childZone20 = ZoneTable.CreateZone( context, 1, rootZone );
-            var childZone21 = ZoneTable.CreateZone( context, 1, childZone20 );
-            var childZone22 = ZoneTable.CreateZone( context, 1, childZone20 );
+            var childZoneB = await ZoneTable.CreateZoneAsync( context, 1, rootZone );
+            var childZoneB1 = await ZoneTable.CreateZoneAsync( context, 1, childZoneB );
+            var childZoneB2 = await ZoneTable.CreateZoneAsync( context, 1, childZoneB );
 
-            await WeakActorTable.CreateAsync( context, 1, weakActorName, childZone22 );
+            var bottomName = Guid.NewGuid().ToString();
+            await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneB2 );
 
+            // Just to be sure that the any name can be added everywhere.
             await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString() );
             await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), rootZone );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone10 );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone11 );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone12 );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone20 );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone21 );
-            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZone22 );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneA );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneA1 );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneA2 );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneB );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneB1 );
+            await WeakActorTable.CreateAsync( context, 1, Guid.NewGuid().ToString(), childZoneB2 );
 
-            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, weakActorName ) ))
+            // Same (B2).
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, bottomName, childZoneB2 ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            // Direct parent (B).
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, bottomName, childZoneB ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            // Grand parent.
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, bottomName, rootZone ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            // Root 0 zone.
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, bottomName, zoneId: 0 ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
 
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, rootZone ) )
+            // The sibling B1 and all A branch are fine (but we must destroy them immediately).
+            await Should.NotThrowAsync( async () =>
+            {
+                int id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneB1 );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+                id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+                id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA1 );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+                id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA2 );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+            } );
+
+            // Registering a WeakActor in 0 prevents this name to ever exist anywhere else.
+            var veryTopName = Guid.NewGuid().ToString();
+            await WeakActorTable.CreateAsync( context, 1, veryTopName, zoneId: 0 );
+
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, zoneId: 0 ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone10 ) )
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneA2 ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone11 ) )
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone12 ) )
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB1 ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone20 ) )
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, rootZone ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone21 ) )
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB2 ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
-            Should.Throw<SqlDetailedException>( () => WeakActorTable.Create( context, 1, weakActorName, childZone22 ) )
+
+
+            // In B.
+            var topName = Guid.NewGuid().ToString();
+            await WeakActorTable.CreateAsync( context, 1, topName, childZoneB );
+
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB ) ))
                           .InnerException.ShouldBeOfType<SqlException>()
                           .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB2 ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, childZoneB1 ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, rootZone ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            (await Should.ThrowAsync<SqlDetailedException>( () => WeakActorTable.CreateAsync( context, 1, veryTopName, 0 ) ))
+                          .InnerException.ShouldBeOfType<SqlException>()
+                          .Message.ShouldMatch( @".*WeakActor\.WeakActorNameShouldBeUniqueInHZone.*" );
+            // in A branch it's ok.
+            await Should.NotThrowAsync( async () =>
+            {
+                int id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+                id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA1 );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+                id = await WeakActorTable.CreateAsync( context, 1, bottomName, childZoneA2 );
+                await WeakActorTable.DestroyAsync( context, 1, id );
+            } );
         }
     }
 
