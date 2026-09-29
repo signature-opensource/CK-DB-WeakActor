@@ -31,28 +31,29 @@ public abstract partial class WeakActorTable : SqlTable
     public abstract Task DestroyAsync( ISqlCallContext c, int actorId, int weakActorId );
 
     /// <summary>
-    /// Archives a WeakActor by its identifier (does nothing if The WeakActor does not exist).
+    /// Disables a WeakActor by its identifier (does nothing if the WeakActor does not exist).
     /// </summary>
     /// <param name="c">The sql call context to use.</param>
     /// <param name="actorId">The current actor identifier.</param>
-    /// <param name="weakActorId">The WeakActor identifier to archive.</param>
-    [SqlProcedure( "sWeakActorArchive" )]
-    public abstract Task ArchiveAsync( ISqlCallContext c, int actorId, int weakActorId );
+    /// <param name="weakActorId">The WeakActor identifier to disable.</param>
+    [SqlProcedure( "sWeakActorDisable" )]
+    public abstract Task DisableAsync( ISqlCallContext c, int actorId, int weakActorId );
 
     /// <summary>
-    /// Restores a WeakActor by its identifier (does nothing if The WeakActor does not exist).
+    /// Enables a WeakActor by its identifier (does nothing if the WeakActor does not exist).
     /// </summary>
     /// <param name="c">The sql call context to use.</param>
     /// <param name="actorId">The current actor identifier.</param>
-    /// <param name="weakActorId">The WeakActor identifier to restore.</param>
-    [SqlProcedure( "sWeakActorRestore" )]
-    public abstract Task RestoreAsync( ISqlCallContext c, int actorId, int weakActorId );
+    /// <param name="weakActorId">The WeakActor identifier to enable.</param>
+    [SqlProcedure( "sWeakActorEnable" )]
+    public abstract Task EnableAsync( ISqlCallContext c, int actorId, int weakActorId );
 
     /// <summary>
     /// Renames a WeakActor.
     /// </summary>
     /// <param name="c">The sql call context to use.</param>
     /// <param name="actorId">The current actor identifier.</param>
+    /// <param name="weakActorId">The WeakActor identifier to rename.</param>
     /// <param name="weakActorName">The WeakActor new name.</param>
     [SqlProcedure( "sWeakActorRename" )]
     public abstract Task RenameAsync( ISqlCallContext c, int actorId, int weakActorId, string weakActorName );

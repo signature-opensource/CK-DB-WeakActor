@@ -12,6 +12,4 @@ public abstract class Package : Zone.WeakActor.Package
 {
     // void StObjConstruct( Zone.WeakActor.Package zone, Actor.WeakActor.Package weakActor ) { }
 
-    public new WeakActorTable WeakActorTable => base.WeakActorTable as WeakActorTable;
-
 }

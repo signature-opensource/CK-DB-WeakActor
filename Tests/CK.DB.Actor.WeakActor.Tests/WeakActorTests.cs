@@ -20,8 +20,7 @@ public class WeakActorTests
     {
         using( var context = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
-            await Util.Invokable( () => Table.CreateAsync( context, 0, Guid.NewGuid().ToString() ) )
-                       .ShouldThrowAsync<SqlDetailedException>();
+            await Should.ThrowAsync<SqlDetailedException>( () => Table.CreateAsync( context, 0, Guid.NewGuid().ToString() ) );
         }
     }
 
@@ -88,8 +87,8 @@ public class WeakActorTests
         {
             var groupId = await groupTable.CreateGroupAsync( context, 1 );
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
-            await Table.ArchiveAsync( context, 1, weakActorId );
-            var sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            await Table.DisableAsync( context, 1, weakActorId );
+            var sql = "select DisableDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldNotBe( DateTime.MinValue );
         }
@@ -107,12 +106,12 @@ public class WeakActorTests
         {
             var groupId = await groupTable.CreateGroupAsync( context, 1 );
             var weakActorId = await Table.CreateAsync( context, 1, Guid.NewGuid().ToString() );
-            await Table.ArchiveAsync( context, 1, weakActorId );
-            var sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            await Table.DisableAsync( context, 1, weakActorId );
+            var sql = "select DisableDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldNotBe( DateTime.MinValue );
-            await Table.RestoreAsync( context, 1, weakActorId );
-            sql = "select ArchiveDate from CK.tWeakActor where WeakActorId = @weakActorId";
+            await Table.EnableAsync( context, 1, weakActorId );
+            sql = "select DisableDate from CK.tWeakActor where WeakActorId = @weakActorId";
             context[Table].QuerySingle<DateTime>( sql, new { groupId, weakActorId } )
                           .ShouldBe( DateTime.MinValue );
         }

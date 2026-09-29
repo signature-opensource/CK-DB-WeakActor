@@ -1,0 +1,16 @@
+-- SetupConfig: {}
+create transformer on CK.sZoneMemberAdd
+as
+begin
+
+    inject "
+            -- If the @MemberId is a WeakActor it SHOULD already be in the Zone: 
+            -- if it's not, let this call fix it (but only for the defining Zone).
+            if exists( select 1 from CK.tWeakActor w where w.WeakActorId = @MemberId and w.ZoneId <> @ZoneId )
+            begin
+		        ;throw 50000, 'Group.InvalidWeakActorZone', 1;
+            end
+    "
+    into PreZoneMemberAdd
+
+end

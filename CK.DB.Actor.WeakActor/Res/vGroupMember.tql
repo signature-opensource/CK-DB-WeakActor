@@ -1,0 +1,19 @@
+-- SetupConfig: {}
+create transformer on CK.vGroupMember
+as
+begin
+
+    replace single {else '?' end}
+        with "when w.WeakActorId is not null then 'WeakActor' else '?' end";
+
+    replace single {u.UserName,}
+        with "u.UserName, w.DisplayName,";
+
+    replace single {u.CreationDate,}
+        with "u.CreationDate, w.CreationDate,";
+
+    inject "
+            left outer join CK.vWeakActor w on w.WeakActorId = p.ActorId
+        "
+        after single {left outer join CK.vUser u on u.UserId = p.ActorId};
+end

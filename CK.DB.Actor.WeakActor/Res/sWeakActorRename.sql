@@ -16,7 +16,7 @@ begin
         if exists( select 1 from CK.tWeakActor where WeakActorId <> @WeakActorId and WeakActorName = @WeakActorName )
             throw 50000, 'WeakActor.NameAlreadyTaken', 1;
 
-        --<PreUpdate />
+        --<PreUpdate revert />
 
         update CK.tWeakActor
             set WeakActorName = @WeakActorName

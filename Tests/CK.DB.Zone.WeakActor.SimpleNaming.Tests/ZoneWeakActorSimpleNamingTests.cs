@@ -11,9 +11,9 @@ namespace CK.DB.Zone.WeakActor.SimpleNaming.Tests;
 
 public class ZoneWeakActorSimpleNamingTests
 {
-    WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>();
-    ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>();
-    GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>();
+    WeakActorTable WeakActorTable => SharedEngine.Map.StObjs.Obtain<WeakActorTable>().ShouldNotBeNull();
+    ZoneTable ZoneTable => SharedEngine.Map.StObjs.Obtain<ZoneTable>().ShouldNotBeNull();
+    GroupTable GroupTable => SharedEngine.Map.StObjs.Obtain<GroupTable>().ShouldNotBeNull();
 
     [Test]
     public void display_name_should_be_unique()
@@ -30,7 +30,7 @@ public class ZoneWeakActorSimpleNamingTests
         }
     }
 
-    private void Populate( SqlStandardCallContext context )
+    void Populate( SqlStandardCallContext context )
     {
         var zoneId1 = ZoneTable.CreateZone( context, 1 );
         var zoneId2 = ZoneTable.CreateZone( context, 1 );
@@ -42,6 +42,6 @@ public class ZoneWeakActorSimpleNamingTests
         WeakActorTable.Create( context, 1, weakActorName2, zoneId2 );
         WeakActorTable.Create( context, 1, weakActorName3, zoneId2 );
         var group = GroupTable.CreateGroup( context, 1, zoneId1 );
-        WeakActorTable.AddIntoGroup( context, 1, group, weakActorId );
+        GroupTable.AddMember( context, 1, group, weakActorId );
     }
 }

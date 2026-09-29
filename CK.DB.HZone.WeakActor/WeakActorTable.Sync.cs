@@ -13,10 +13,7 @@ public abstract partial class WeakActorTable
     /// <param name="weakActorName">The WeakActorName candidate.</param>
     /// <returns>True when WeakActorName already exists in the hierarchy.</returns>
     [SqlScalarFunction( "fIsWeakActorNameInHierarchy" )]
-    public abstract bool IsWeakActorNameInHierarchy
-    (
-        ISqlCallContext ctx,
-        int zoneId,
-        string weakActorName
-    );
+    public abstract bool IsWeakActorNameInHierarchy( ISqlCallContext ctx,
+                                                     int zoneId,
+                                                     string weakActorName );
 }

@@ -12,7 +12,7 @@ begin
 							except 
 					    select w.WeakActorId from CK.tWeakActor w where w.ZoneId = @CurrentZoneId )
             begin
-				;throw 50000, 'Group.UserNotInZone', 1;
+				;throw 50000, 'Group.MemberNotInZone', 1;
             end
             else
             begin

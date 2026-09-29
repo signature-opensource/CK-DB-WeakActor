@@ -1,4 +1,4 @@
-create procedure CK.sWeakActorArchive
+create procedure CK.sWeakActorEnable
 (
     @ActorId int,
     @WeakActorId int
@@ -12,10 +12,10 @@ begin
 
     if exists( select 1 from CK.tWeakActor where WeakActorId = @WeakActorId )
     begin
-        --<PreUpdate />
+        --<PreUpdate revert />
 
         update CK.tWeakActor
-            set ArchiveDate = sysutcdatetime()
+            set DisableDate = '0001-01-01'
             where WeakActorId = @WeakActorId;
 
         --<PostUpdate />
