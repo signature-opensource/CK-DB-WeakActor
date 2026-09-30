@@ -1,0 +1,71 @@
+-- SetupConfig: {}
+create transformer on CK.sGroupMove
+as
+begin
+    -- With HZone, a WeakActor can be a member of the Groups of its defining Zone and of its child Zones
+    -- (and of these child Zones themselves).
+    -- When a Group (or a Zone) is moved, the WeakActors that are no more reachable (their defining Zone is not
+    -- the target Zone nor one of its parents) are always removed, regardless of the @Option: this is the
+    -- same invariant as the non hierarchical Zone.WeakActor.
+    -- When the moved Group is a Zone, the WeakActors defined in it (or in its child Zones) follow it: they are
+    -- always reachable. This is position independent: this works before and after the sZoneMove reparenting.
+    inject "
+        declare @WeakActorMovedZoneHId hierarchyid;
+        select @WeakActorMovedZoneHId = HierarchicalId from CK.tZone where ZoneId = @GroupId;
+        declare @WeakActorNewZoneHId hierarchyid;
+        select @WeakActorNewZoneHId = HierarchicalId from CK.tZone where ZoneId = @NewZoneId;
+
+        -- When a Zone is moved, the WeakActor names defined in it (or in its child Zones) must not clash with
+        -- the ones defined in the new parent Zone or its parents (the WeakActorName is unique in a hierarchy branch).
+        -- The moved Zones are all below their new parents: this is the only check needed.
+        if @WeakActorMovedZoneHId is not null
+           and exists( select 1
+                        from CK.tWeakActor n
+                        inner join CK.tZone zn on zn.ZoneId = n.ZoneId
+                        inner join CK.tWeakActor a on a.WeakActorName = n.WeakActorName
+                        inner join CK.tZone za on za.ZoneId = a.ZoneId
+                        where zn.HierarchicalId.IsDescendantOf( @WeakActorMovedZoneHId ) = 1
+                              and @WeakActorNewZoneHId.IsDescendantOf( za.HierarchicalId ) = 1 )
+        begin
+            ;throw 50000, 'WeakActor.WeakActorNameShouldBeUniqueInHZone', 1;
+        end
+
+        declare @UnreachableWeakActorId int;
+        declare @CUnreachableWeakActor cursor;
+        set @CUnreachableWeakActor = cursor local static for
+            select w.WeakActorId
+                from CK.tActorProfile p
+                inner join CK.tWeakActor w on w.WeakActorId = p.ActorId
+                inner join CK.tZone d on d.ZoneId = w.ZoneId
+                where p.GroupId = @GroupId
+                      and @WeakActorNewZoneHId.IsDescendantOf( d.HierarchicalId ) = 0
+                      and (@WeakActorMovedZoneHId is null or d.HierarchicalId.IsDescendantOf( @WeakActorMovedZoneHId ) = 0);
+        open @CUnreachableWeakActor;
+        fetch from @CUnreachableWeakActor into @UnreachableWeakActorId;
+        while @@FETCH_STATUS = 0
+        begin
+            -- When the Group is a Zone, this removes the WeakActor from its child Zones and all their Groups.
+            exec CK.sGroupMemberRemove @ActorId, @GroupId, @UnreachableWeakActorId;
+            fetch next from @CUnreachableWeakActor into @UnreachableWeakActorId;
+        end
+        deallocate @CUnreachableWeakActor;
+    "
+    into "PreCheckGroupMove";
+
+    -- The WeakActors defined in a moved Zone are not (and must not be) in the target Zone: they must not
+    -- be considered as members that are "not in the target Zone" by the @Option handling.
+    replace all 2 {p.GroupId = @NewZoneId}
+    with "(p.GroupId = @NewZoneId or exists( select 1 from CK.tWeakActor w where w.WeakActorId = p.ActorId and w.ZoneId = @GroupId ))";
+
+    -- Since the unreachable WeakActors have been removed, the remaining ones are reachable from the target Zone:
+    -- they are handled like any other member (AutoUserRegistration registers them in the target Zone).
+    -- This cancels the non hierarchical Zone.WeakActor rule "WeakActors don't follow the group".
+    replace single {or exists(select 1 from CK.tWeakActor where WeakActorId = @ExtraMemberIdInZone)}
+    with "/* HZone: reachable WeakActors follow the @Option. */";
+
+    -- For the same reason, the non hierarchical Zone.WeakActor "Group with only WeakActors is cleared" rule
+    -- (for the None option) doesn't apply: reachable WeakActors that are not in the target Zone are like Users.
+    replace single {exec CK.sGroupRemoveAllMembers @ActorId, @GroupId;}
+    with ";throw 50000, 'Group.MemberNotInZone', 1;";
+
+end

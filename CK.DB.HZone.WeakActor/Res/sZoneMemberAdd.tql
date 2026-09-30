@@ -5,28 +5,24 @@ begin
 
     inject
     "
-                -- When @DefiningParentZoneId is not null it must appear in the @Parents otherwise it is a Group.InvalidWeakActorZone error.
-                -- And if it is found, only @Parents that are below it must be considered (because here @AutoAddMemberInParentZone = 1).
-                declare @DefiningParentDepth int = 0;
-                if @DefiningParentZoneId is not null 
-                begin
-                    select @DefiningParentDepth = p.Depth from @Parents p where p.ZoneId = @DefiningParentZoneId;
-                end
-
-                -- If the @DefiningParentZoneId is not null and @DefiningParentDepth is 0, we skip the add in parents:
-                -- this will fail below with the check for WeakActor.
-                if @DefiningParentZoneId is null or @DefiningParentDepth > 0
-                begin
-                    -- We handled the parents: the Zone can accept the WeakActor.
-                    set @DefiningParentZoneId = null;
+        -- A WeakActor is never a member of the Zones above its defining Zone: only the @Parents from
+        -- its defining Zone must be considered (regardless of @AutoAddMemberInParentZone).
+        -- The root Zone 0 (level 0) is the parent of all the Zones: all the @Parents are considered.
+        -- When the defining Zone doesn't appear in the @Parents, no parent is considered: this fails
+        -- below with Group.InvalidWeakActorZone (unless this Zone is the defining Zone).
+        if @DefiningParentZoneId is not null
+        begin
+            declare @DefiningParentDepth int = -1;
+            if @DefiningParentZoneId = 0 set @DefiningParentDepth = 0;
+            else select @DefiningParentDepth = p.Depth from @Parents p where p.ZoneId = @DefiningParentZoneId;
+            delete from @Parents where @DefiningParentDepth < 0 or Depth < @DefiningParentDepth;
+            if @DefiningParentDepth >= 0
+            begin
+                -- The defining Zone is a parent: the Zone can accept the WeakActor.
+                set @DefiningParentZoneId = null;
+            end
+        end
     "
-    before single {declare @ParentZoneId int};
+    after single {order by z.HierarchicalId.GetLevel() asc;};
 
-    replace single {select ZoneId from @Parents where HasMember = 0 order by Depth}
-        with "select ZoneId from @Parents where HasMember = 0 and (@DefiningParentDepth = 0 or Depth >= @DefiningParentDepth) order by Depth";
-
-    inject "
-                end
-    "
-        after single {deallocate @CParentZone;};
 end
