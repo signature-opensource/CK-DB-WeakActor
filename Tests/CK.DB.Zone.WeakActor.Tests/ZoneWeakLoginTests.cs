@@ -49,12 +49,12 @@ public class ZoneWeakLoginTests
         }
 
         var r1 = await p.LoginAsync( TestHelper.Monitor, "Weak", Command( name, zone1 ) );
-        r1.User.ShouldNotBeNull().UserId.ShouldBe( id1 );
-        r1.User.UserName.ShouldBe( $"{name} (#Zone-{zone1})", "The DisplayName of CK.vWeakActor, transformed by CK.DB.Zone.WeakActor." );
-        r1.User.Level.ShouldBe( AuthLevel.Unsafe );
+        r1.Actor.ShouldNotBeNull().ActorId.ShouldBe( id1 );
+        r1.Actor.ActorName.ShouldBe( $"{name} (#Zone-{zone1})", "The DisplayName of CK.vWeakActor, transformed by CK.DB.Zone.WeakActor." );
+        r1.Actor.Level.ShouldBe( AuthLevel.Unsafe );
 
         var r2 = await p.LoginAsync( TestHelper.Monitor, "Weak", Command( name, zone2 ) );
-        r2.User.ShouldNotBeNull().UserId.ShouldBe( id2 );
+        r2.Actor.ShouldNotBeNull().ActorId.ShouldBe( id2 );
 
         var r3 = await p.LoginAsync( TestHelper.Monitor, "Weak", Command( name, zone3 ) );
         r3.IsSuccess.ShouldBeFalse();

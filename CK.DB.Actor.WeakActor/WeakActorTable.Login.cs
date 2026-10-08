@@ -13,7 +13,7 @@ namespace CK.DB.Actor.WeakActor;
 
 /// <summary>
 /// The weak actors are the actors of the "Weak" authentication provider: a weak actor logs in with its name only,
-/// at the <see cref="AuthLevel.Unsafe"/> level (the "Weak" scheme caps it, see <see cref="UserInfo.IsWeak"/>).
+/// at the <see cref="AuthLevel.Unsafe"/> level (the "Weak" scheme caps it, see <see cref="ActorInfo.IsWeak"/>).
 /// <para>
 /// The payload of the provider is the <see cref="IWeakLoginCommand"/> itself and this table handles it: a package that
 /// implements an authentication provider handles its login commands.
@@ -22,9 +22,9 @@ namespace CK.DB.Actor.WeakActor;
 public abstract partial class WeakActorTable : IGenericAuthenticationProvider
 {
     /// <summary>
-    /// The provider name: "Weak" (<see cref="UserInfo.WeakScheme"/>).
+    /// The provider name: "Weak" (<see cref="ActorInfo.WeakScheme"/>).
     /// </summary>
-    public string ProviderName => UserInfo.WeakScheme;
+    public string ProviderName => ActorInfo.WeakScheme;
 
     /// <summary>
     /// The payload is the <see cref="IWeakLoginCommand"/>: it cannot be created here.

@@ -44,12 +44,12 @@ public class WeakLoginTests
         (await p.LoginAsync( TestHelper.Monitor, "Weak", Command( name ), actualLogin: false )).IsSuccess.ShouldBeTrue();
         var r = await p.LoginAsync( TestHelper.Monitor, "Weak", Command( name ) );
         r.IsSuccess.ShouldBeTrue();
-        r.User!.UserId.ShouldBe( id );
-        r.User.UserName.ShouldBe( name, "The DisplayName of CK.vWeakActor." );
-        r.User.IsWeak.ShouldBeTrue();
-        r.User.Level.ShouldBe( AuthLevel.Unsafe );
-        r.User.Schemes.ShouldHaveSingleItem().Name.ShouldBe( "Weak" );
-        r.User.Schemes[0].LastUsed.ShouldBeGreaterThan( DateTime.UtcNow.AddMinutes( -1 ) );
+        r.Actor!.ActorId.ShouldBe( id );
+        r.Actor.ActorName.ShouldBe( name, "The DisplayName of CK.vWeakActor." );
+        r.Actor.IsWeak.ShouldBeTrue();
+        r.Actor.Level.ShouldBe( AuthLevel.Unsafe );
+        r.Actor.Schemes.ShouldHaveSingleItem().Name.ShouldBe( "Weak" );
+        r.Actor.Schemes[0].LastUsed.ShouldBeGreaterThan( DateTime.UtcNow.AddMinutes( -1 ) );
     }
 
     [Test]
@@ -70,11 +70,11 @@ public class WeakLoginTests
     [Test]
     public async Task a_weak_actor_is_read_at_the_Unsafe_level_even_before_its_first_login_Async()
     {
-        var users = SharedEngine.AutomaticServices.GetRequiredService<SqlUserInfoProvider>();
+        var users = SharedEngine.AutomaticServices.GetRequiredService<SqlActorInfoProvider>();
         var (id, name) = await CreateAsync( enabled: true );
 
-        var u = (await users.GetUserInfoAsync( TestHelper.Monitor, id )).ShouldNotBeNull();
-        u.UserName.ShouldBe( name );
+        var u = (await users.GetActorInfoAsync( TestHelper.Monitor, id )).ShouldNotBeNull();
+        u.ActorName.ShouldBe( name );
         u.IsWeak.ShouldBeTrue();
         u.Level.ShouldBe( AuthLevel.Unsafe );
     }
@@ -82,13 +82,13 @@ public class WeakLoginTests
     [Test]
     public async Task a_disabled_weak_actor_cannot_be_read_Async()
     {
-        var users = SharedEngine.AutomaticServices.GetRequiredService<SqlUserInfoProvider>();
+        var users = SharedEngine.AutomaticServices.GetRequiredService<SqlActorInfoProvider>();
         var (id, _) = await CreateAsync( enabled: true );
         using( var ctx = new SqlStandardCallContext( TestHelper.Monitor ) )
         {
             await Table.DisableAsync( ctx, 1, id );
         }
-        (await users.GetUserInfoAsync( TestHelper.Monitor, id )).ShouldBeNull( "The restoration of a command refuses it." );
+        (await users.GetActorInfoAsync( TestHelper.Monitor, id )).ShouldBeNull( "The restoration of a command refuses it." );
     }
 
     [Test]
