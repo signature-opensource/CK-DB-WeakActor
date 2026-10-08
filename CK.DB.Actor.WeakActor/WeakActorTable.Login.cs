@@ -1,8 +1,6 @@
 using CK.Auth;
 using CK.Core;
-using CK.Cris;
 using CK.DB.Auth;
-using CK.IO.Authentication;
 using CK.IO.Authentication.Weak;
 using CK.SqlServer;
 using System;
@@ -15,8 +13,13 @@ namespace CK.DB.Actor.WeakActor;
 /// The weak actors are the actors of the "Weak" authentication provider: a weak actor logs in with its name only,
 /// at the <see cref="AuthLevel.Unsafe"/> level (the "Weak" scheme caps it, see <see cref="ActorInfo.IsWeak"/>).
 /// <para>
-/// The payload of the provider is the <see cref="IWeakLoginCommand"/> itself and this table handles it: a package that
-/// implements an authentication provider handles its login commands.
+/// The payload of the provider is the <see cref="IWeakLoginCommand"/> itself.
+/// </para>
+/// <para>
+/// A package that implements an authentication provider should handle its login commands, but this package is used by
+/// both authentication stacks: its <see cref="IWeakLoginCommand"/> handler of the new stack needs CK.Cris.Authentication,
+/// that defines the same CK.Auth.CrisAuthenticationService as the old CK.Cris.Auth. The handler is in the AuthCenter
+/// package until the old stack is retired: it must then come back here.
 /// </para>
 /// </summary>
 public abstract partial class WeakActorTable : IGenericAuthenticationProvider
@@ -32,23 +35,6 @@ public abstract partial class WeakActorTable : IGenericAuthenticationProvider
     public bool CanCreatePayload => false;
 
     object IGenericAuthenticationProvider.CreatePayload() => throw new NotSupportedException( "The payload of the Weak provider is the IWeakLoginCommand." );
-
-    /// <summary>
-    /// Handles the <see cref="IWeakLoginCommand"/>: the session is opened by the authentication center.
-    /// <para>
-    /// When a package extends the command (CK.IO.Authentication.WeakZone), this handler is ignored: the
-    /// extending package handles the whole command.
-    /// </para>
-    /// </summary>
-    /// <param name="monitor">The monitor to use.</param>
-    /// <param name="cmd">The command.</param>
-    /// <param name="opener">The session opener.</param>
-    /// <returns>The session result.</returns>
-    [CommandHandler]
-    public virtual ValueTask<ISessionResult> HandleWeakLoginAsync( IActivityMonitor monitor, IWeakLoginCommand cmd, IAuthenticationSessionOpener opener )
-    {
-        return opener.OpenSessionAsync( monitor, cmd, ProviderName, cmd );
-    }
 
     /// <summary>
     /// Logs a weak actor in. An unknown or disabled weak actor fails with <see cref="KnownLoginFailureCode.InvalidUserKey"/>.
