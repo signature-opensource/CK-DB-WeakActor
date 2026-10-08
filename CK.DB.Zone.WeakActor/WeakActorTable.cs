@@ -10,7 +10,7 @@ namespace CK.DB.Zone.WeakActor;
 [SqlTable( "tWeakActor", Package = typeof( Package ), ResourcePath = "Res" )]
 [SetupName( "CK.WeakActorTable-Zone" )]
 [Versions( "1.0.0" )]
-[SqlObjectItem( "transform:vWeakActor, transform:sGroupMemberAdd" )]
+[SqlObjectItem( "transform:vWeakActor, transform:sGroupMemberAdd, transform:sWeakActorLogin" )]
 public abstract partial class WeakActorTable : Actor.WeakActor.WeakActorTable
 {
     void StObjConstruct( Zone.ZoneTable zoneTable ) { }

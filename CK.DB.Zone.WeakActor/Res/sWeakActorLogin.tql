@@ -1,0 +1,12 @@
+-- SetupConfig: {}
+--
+-- With zones, the name of a weak actor is unique in its zone only.
+--
+create transformer on CK.sWeakActorLogin
+as
+begin
+    add parameter @ZoneId int = 0;
+
+    replace single {and WeakActorId > 0}
+    with "and ZoneId = @ZoneId and WeakActorId > 0";
+end

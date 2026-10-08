@@ -1,0 +1,21 @@
+-- SetupConfig: { "AddRequires": "CK.vWeakActor" }
+--
+-- A weak actor is read like a user:
+--  - its name is the DisplayName of CK.vWeakActor: the transformers of the view apply (the zone, its name...).
+--    It uses the collation of CK.tUser.UserName (the transformers of the view may change it);
+--  - a disabled weak actor is not read: it cannot be used (the restoration of a command refuses it);
+--  - the "Weak" scheme is always returned, even before the first login: it is what caps the weak actor
+--    at the Unsafe level (a UserInfo without it would be a regular user).
+--
+create transformer on CK.sAuthUserInfoRead
+as
+begin
+    inject "
+    union all
+    select WeakActorId, DisplayName collate Latin1_General_100_CI_AS from CK.vWeakActor with(nolock)
+        where WeakActorId = @UserId and @UserId > 0 and DisableDate = '0001-01-01'"
+    after single {and @UserId > 0};
+
+    replace single {LastUsed > '0001-01-01'}
+    with "(LastUsed > '0001-01-01' or Scheme = 'Weak')";
+end

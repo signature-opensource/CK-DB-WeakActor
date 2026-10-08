@@ -4,16 +4,11 @@ as
 begin
 
     /*
-        Note: for a <Insertion> point.
-        We need 
-        - before <Insertion> (injects at the top regardless of the revert).
-        - into <Insertion> (respects the revert)
-        - after <Insertion> (injects at the bottom regardless of the revert).
-        Here we need to enclose the --<PreZoneMemberAdd revert>.
-        The following only works because nobody injected anything in the <PreZoneMemberAdd>.
-        Do we need?
-        - before full <Insertion> (injects before <Insertion>).
-        - after full <Insertion> (injects after <Insertion> or </Insertion>).
+        The injections don't rely on the content of <PreZoneMemberAdd>: other transformers (CK.DB.HZone)
+        inject into it and their order relative to this one is not defined.
+        - The @DefiningParentZoneId is declared before <PreZoneMemberAdd>: the injected code can use (and
+          change) it, see CK.DB.HZone.WeakActor.
+        - The check is done after <PreZoneMemberAdd>, right before the insertion.
     */
 
     inject "
@@ -24,13 +19,13 @@ begin
     before single "--<PreZoneMemberAdd";
 
     inject "
-            -- If the @MemberId is a WeakActor it SHOULD already be in the Zone: 
+            -- If the @MemberId is a WeakActor it SHOULD already be in the Zone:
             -- if it's not, let this call fix it (but only for the defining Zone).
             if @DefiningParentZoneId is not null and @DefiningParentZoneId <> @ZoneId
             begin
 		        ;throw 50000, 'Group.InvalidWeakActorZone', 1;
             end
     "
-    after single "--<PreZoneMemberAdd";
+    before single {insert into CK.tActorProfile( ActorId, GroupId ) values( @MemberId, @ZoneId );};
 
 end

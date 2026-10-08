@@ -1,0 +1,10 @@
+-- SetupConfig: { "AddRequires": "Model.CK.WeakActorTable" }
+--
+create transformer on CK.vUserAuthProvider
+as
+begin
+    inject "
+    union all
+    select WeakActorId, 'Weak', LastLoginTime from CK.tWeakActor where WeakActorId > 0
+    " after first part {select};
+end

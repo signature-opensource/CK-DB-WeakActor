@@ -15,7 +15,11 @@ create table CK.tWeakActor
     CreationDate datetime2 (2) not null constraint DF_CK_tWeakActor_CreationDate default ( sysutcdatetime() ),
 
     -- Disabled by default: a WeakActor must be explicitely enabled after its creation.
-    DisableDate datetime2 (2) not null constraint DF_CK_tWeakActor_DisableDate default ( sysutcdatetime() )
+    DisableDate datetime2 (2) not null constraint DF_CK_tWeakActor_DisableDate default ( sysutcdatetime() ),
+
+    -- The weak actors are the actors of the "Weak" authentication provider.
+    -- '0001-01-01' until the first login.
+    LastLoginTime datetime2 (2) not null constraint DF_CK_tWeakActor_LastLoginTime default ( '0001-01-01' )
 );
 
 insert into CK.tWeakActor( WeakActorId, WeakActorName ) values ( 0, N'' );

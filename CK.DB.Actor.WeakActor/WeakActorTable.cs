@@ -8,8 +8,8 @@ namespace CK.DB.Actor.WeakActor;
 /// Holds the persisted weak actor.
 /// </summary>
 [SqlTable( "tWeakActor", Package = typeof( Package ) )]
-[Versions( "1.0.0, 1.1.0, 1.2.0" )]
-[SqlObjectItem( "vWeakActor" )]
+[Versions( "1.0.0, 1.1.0, 1.2.0, 1.3.0" )]
+[SqlObjectItem( "vWeakActor, sWeakActorLogin" )]
 public abstract partial class WeakActorTable : SqlTable
 {
     /// <summary>
