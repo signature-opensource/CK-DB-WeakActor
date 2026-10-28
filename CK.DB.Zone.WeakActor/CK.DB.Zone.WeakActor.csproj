@@ -8,7 +8,6 @@
     <PackageReference Include="CK.DB.Zone" Version="30.0.3-0.cris-auth.0.ci.11" />
     <!-- The IWeakZoneLoginCommand handler stays here: the AuthCenter cannot know CK.IO.Authentication.WeakZone. No
          old-stack application uses the zone weak actors. -->
-    <PackageReference Include="CK.Cris.Authentication" Version="2.0.2-0.cris-auth.0.ci.12" />
     <PackageReference Include="CK.IO.Authentication.WeakZone" Version="2.0.2-0.cris-auth.0.ci.9" />
   </ItemGroup>
   <ItemGroup>

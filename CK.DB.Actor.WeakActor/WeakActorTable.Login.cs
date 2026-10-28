@@ -16,10 +16,9 @@ namespace CK.DB.Actor.WeakActor;
 /// The payload of the provider is the <see cref="IWeakLoginCommand"/> itself.
 /// </para>
 /// <para>
-/// A package that implements an authentication provider should handle its login commands, but this package is used by
-/// both authentication stacks: its <see cref="IWeakLoginCommand"/> handler of the new stack needs CK.Cris.Authentication,
-/// that defines the same CK.Auth.CrisAuthenticationService as the old CK.Cris.Auth. The handler is in the AuthCenter
-/// package until the old stack is retired: it must then come back here.
+/// The <see cref="IWeakLoginCommand"/> is handled at the endpoint that receives it (CK.Cris.Authentication.Weak), never
+/// here: an endpoint may have no database. This provider is called by the authentication center when it opens the
+/// session.
 /// </para>
 /// </summary>
 public abstract partial class WeakActorTable : IGenericAuthenticationProvider
