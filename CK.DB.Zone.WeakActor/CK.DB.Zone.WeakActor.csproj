@@ -5,10 +5,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.DB.Actor.WeakActor\CK.DB.Actor.WeakActor.csproj" />
-    <PackageReference Include="CK.DB.Zone" Version="31.0.0-0.cris-auth.0.ci.27" />
+    <PackageReference Include="CK.DB.Zone" Version="31.0.0-0.cris-auth" />
     <!-- The IWeakZoneLoginCommand handler stays here: the AuthCenter cannot know CK.IO.Authentication.WeakZone. No
          old-stack application uses the zone weak actors. -->
-    <PackageReference Include="CK.IO.Authentication.WeakZone" Version="3.0.0-0.cris-auth.0.ci.35" />
+    <PackageReference Include="CK.IO.Authentication.WeakZone" Version="3.0.0-0.cris-auth" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
