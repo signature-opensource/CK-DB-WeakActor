@@ -4,8 +4,8 @@
     <Description>This package implements Zone.WeakActor.SimpleNaming</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="31.0.0-0.uc.0.ci.69" />
-    <PackageReference Include="CK.SqlServer.Setup.Model" Version="36.0.0-0.uc.0.ci.67" />
+    <PackageReference Include="CK.DB.Zone.SimpleNaming" Version="31.0.0-0.uc.0.ci.70" />
+    <PackageReference Include="CK.SqlServer.Setup.Model" Version="36.0.0-0.uc.0.ci.68" />
     <ProjectReference Include="..\CK.DB.Zone.WeakActor\CK.DB.Zone.WeakActor.csproj" />
   </ItemGroup>
   <ItemGroup>
