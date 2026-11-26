@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CK.DB.Zone.WeakActor\CK.DB.Zone.WeakActor.csproj" />
-    <PackageReference Include="CK.DB.HZone" Version="31.0.0-0.uc.4" />
+    <PackageReference Include="CK.DB.HZone" Version="31.0.0-0.uc.4.ci.141" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.sql;**\*.tql;**\*.y4" />
